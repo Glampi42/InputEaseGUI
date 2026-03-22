@@ -10,6 +10,8 @@ target_sources(inputeasegui_start
     main.cpp
     helpers/qmlaction.h
     helpers/qmlaction.cpp
+    helpers/standardactions.h
+    helpers/standardactions.cpp
 )
 
 ecm_target_qml_sources(inputeasegui_start

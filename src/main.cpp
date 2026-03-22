@@ -7,6 +7,8 @@
 #include <KLocalizedString>
 #include <KIconTheme>
 
+#include <helpers/standardactions.h>
+
 int main(int argc, char *argv[])
 {
     // general settings
@@ -22,6 +24,13 @@ int main(int argc, char *argv[])
     if (qEnvironmentVariableIsEmpty("QT_QUICK_CONTROLS_STYLE")) {
         QQuickStyle::setStyle(QStringLiteral("org.kde.desktop"));
     }
+
+    // passing down KStandardActions to QML files
+    qmlRegisterSingletonType<StandardActions>(
+        "me.glampi.inputeasegui", 1, 0, "StandardActions",
+        [](QQmlEngine *, QJSEngine *) -> QObject * {
+            return new StandardActions();
+        });
 
     QQmlApplicationEngine engine;
 

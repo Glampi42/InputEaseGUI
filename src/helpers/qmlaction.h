@@ -2,6 +2,9 @@
 #include <QObject>
 #include <QAction>
 
+/**
+ * @brief Class for wrapping the standard actions from KStandardActions for use in QML files.
+ */
 class QmlAction : public QObject {
     Q_OBJECT
     Q_PROPERTY(QString text     READ text     NOTIFY changed)
@@ -17,7 +20,7 @@ public:
 
     Q_INVOKABLE void trigger() { m_action->trigger(); }
 
-signals:
+Q_SIGNALS:
     void changed();
     void triggered();
 
