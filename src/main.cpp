@@ -9,6 +9,7 @@
 
 int main(int argc, char *argv[])
 {
+    // general settings
     KIconTheme::initTheme();
     QApplication app(argc, argv);
     KLocalizedString::setApplicationDomain("inputeasegui");

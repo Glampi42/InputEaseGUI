@@ -4,32 +4,55 @@ import QtQuick.Layouts
 import QtQuick.Controls as QQC
 import org.kde.kirigami as Kirigami
 
-// Provides basic features needed for all kirigami applications
+// main window
 Kirigami.ApplicationWindow {
-    // Unique identifier to reference this object
     id: root
 
-    width: 400
-    height: 300
+    property int window_width: 400
+    property int window_height: 300
+
+    width: root.window_width
+    height: root.window_height
+    visible: true
 
     // Window title
     // i18nc() makes a string translatable
     // and provides additional context for the translators
-    title: i18nc("@title:window", "Hello World")
+    title: i18nc("@title:window", "Input Ease GUI")
 
-    // Set the first page that will be loaded when the app opens
-    // This can also be set to an id of a Kirigami.Page
+    Component.onCompleted: {
+        pageStack.globalToolBar.style = Kirigami.ApplicationHeaderStyle.None
+    }
+
+    header: MainToolbar {}
+
     pageStack.initialPage: Kirigami.Page {
-        QQC.Label {
-            // Center label horizontally and vertically within parent object
-            anchors.centerIn: parent
-            text: i18n("Hello World!")
-        }
+        id: main_page
 
-        QQC.Label {
-            anchors.left: parent.left
-            anchors.bottom: parent.bottom
-            text: i18n("Left")
+        property int global_alignment: Qt.application.layoutDirection
+
+        padding: 0
+
+        QQC.SplitView {
+            id: split
+
+            anchors.fill: parent
+            orientation: ListView.Horizontal
+
+            // page with the devices
+            DevicesPage {
+                QQC.SplitView.minimumWidth: 50
+                QQC.SplitView.preferredWidth: 0.3820*root.window_width // golden ratio
+            }
+
+            QQC.Frame {
+                QQC.SplitView.minimumWidth: 50
+                QQC.SplitView.preferredWidth: 0.6180*root.window_width // golden ratio
+
+                QQC.Button {
+                    text: "Another"
+                }
+            }
         }
     }
 }

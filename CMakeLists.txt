@@ -25,6 +25,7 @@ find_package(KF6 REQUIRED COMPONENTS
     CoreAddons
     QQC2DesktopStyle
     IconThemes
+    Config
 )
 
 ecm_find_qmlmodule(org.kde.kirigami REQUIRED)
