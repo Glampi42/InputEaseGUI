@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Input Ease GUI
+Exec=inputeasegui_start
+Icon=kde
+Type=Application
+Terminal=false
+Categories=Utility
