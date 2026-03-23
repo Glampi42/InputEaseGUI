@@ -6,53 +6,59 @@ import org.kde.kirigami as Kirigami
 
 // main window
 Kirigami.ApplicationWindow {
-    id: root
+   id: root
 
-    property int window_width: 400
-    property int window_height: 300
+   property int window_width: 400
+   property int window_height: 300
 
-    width: root.window_width
-    height: root.window_height
-    visible: true
+   width: root.window_width
+   height: root.window_height
+   visible: true
 
-    // Window title
-    // i18nc() makes a string translatable
-    // and provides additional context for the translators
-    title: i18nc("@title:window", "Input Ease GUI")
+   // Window title
+   // i18nc() makes a string translatable
+   // and provides additional context for the translators
+   title: i18nc("@title:window", "Input Ease GUI")
 
-    Component.onCompleted: {
-        pageStack.globalToolBar.style = Kirigami.ApplicationHeaderStyle.None
-    }
+   Component.onCompleted: {
+      pageStack.globalToolBar.style = Kirigami.ApplicationHeaderStyle.None;
+   }
 
-    header: MainToolbar {}
+   header: MainToolbar {}
 
-    pageStack.initialPage: Kirigami.Page {
-        id: main_page
+   pageStack.initialPage: Kirigami.Page {
+      id: main_page
 
-        property int global_alignment: Qt.application.layoutDirection
+      // Qt.LeftToRight for English, Qt.RightToLeft for Arabic
+      property int text_alignment: Qt.application.layoutDirection
+      property int text_alignment_reverse: Qt.application.layoutDirection === Qt.LeftToRight ? Qt.RightToLeft : Qt.LeftToRight
 
-        padding: 0
+      // Qt.AlignLeft for English, Qt.AlignRight for Arabic
+      property int layout_alignment: Qt.application.layoutDirection === Qt.LeftToRight ? Qt.AlignLeft : Qt.AlignRight
+      property int layout_alignment_reverse: Qt.application.layoutDirection === Qt.LeftToRight ? Qt.AlignRight : Qt.AlignLeft
 
-        QQC.SplitView {
-            id: split
+      padding: 0
 
-            anchors.fill: parent
-            orientation: ListView.Horizontal
+      QQC.SplitView {
+         id: split
 
-            // page with the devices
-            DevicesPage {
-                QQC.SplitView.minimumWidth: 50
-                QQC.SplitView.preferredWidth: 0.3820*root.window_width // golden ratio
+         anchors.fill: parent
+         orientation: ListView.Horizontal
+
+         // page with the devices
+         DevicesPage {
+            QQC.SplitView.minimumWidth: 50
+            QQC.SplitView.preferredWidth: 0.3820 * root.window_width // golden ratio
+         }
+
+         QQC.Frame {
+            QQC.SplitView.minimumWidth: 50
+            QQC.SplitView.preferredWidth: 0.6180 * root.window_width // golden ratio
+
+            QQC.Button {
+               text: "Another"
             }
-
-            QQC.Frame {
-                QQC.SplitView.minimumWidth: 50
-                QQC.SplitView.preferredWidth: 0.6180*root.window_width // golden ratio
-
-                QQC.Button {
-                    text: "Another"
-                }
-            }
-        }
-    }
+         }
+      }
+   }
 }
