@@ -8,8 +8,8 @@ import org.kde.kirigami as Kirigami
 Kirigami.ApplicationWindow {
    id: root
 
-   property int window_width: 400
-   property int window_height: 300
+   property int window_width: 800
+   property int window_height: 500
 
    width: root.window_width
    height: root.window_height
