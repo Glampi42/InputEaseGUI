@@ -8,8 +8,8 @@
  */
 class StandardActions : public QObject {
     Q_OBJECT
-    // QML_ELEMENT
-    // QML_SINGLETON
+    QML_ELEMENT
+    QML_SINGLETON
 
     Q_PROPERTY(QmlAction* save READ save CONSTANT)
     Q_PROPERTY(QmlAction* delete_action READ delete_action CONSTANT)

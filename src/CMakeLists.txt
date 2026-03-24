@@ -8,10 +8,6 @@ ecm_add_qml_module(inputeasegui_start
 target_sources(inputeasegui_start
     PRIVATE
     main.cpp
-    helpers/qmlaction.h
-    helpers/qmlaction.cpp
-    helpers/standardactions.h
-    helpers/standardactions.cpp
 )
 
 ecm_target_qml_sources(inputeasegui_start
@@ -33,6 +29,9 @@ target_link_libraries(inputeasegui_start
     KF6::IconThemes
     KF6::ConfigCore
     KF6::ConfigGui
+    inputeasegui_helpers
 )
+
+add_subdirectory(helpers)
 
 install(TARGETS inputeasegui_start ${KDE_INSTALL_TARGETS_DEFAULT_ARGS})
