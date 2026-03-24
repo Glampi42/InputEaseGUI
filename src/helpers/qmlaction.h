@@ -7,6 +7,7 @@
  */
 class QmlAction : public QObject {
     Q_OBJECT
+
     Q_PROPERTY(QString text     READ text     NOTIFY changed)
     Q_PROPERTY(QString iconName READ iconName NOTIFY changed)
     Q_PROPERTY(bool enabled     READ enabled  WRITE setEnabled NOTIFY changed)

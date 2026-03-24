@@ -3,15 +3,16 @@
 #include <QtQml>
 #include <QUrl>
 #include <QQuickStyle>
+#include <QStandardItemModel>
 #include <KLocalizedContext>
 #include <KLocalizedString>
 #include <KIconTheme>
 
-#include <helpers/standardactions.h>
+#include "helpers/standardactions.h"
 
 int main(int argc, char *argv[])
 {
-    // general settings
+    //-----------------General settings-----------------DOWN
     KIconTheme::initTheme();
     QApplication app(argc, argv);
     KLocalizedString::setApplicationDomain("inputeasegui");
@@ -24,6 +25,7 @@ int main(int argc, char *argv[])
     if (qEnvironmentVariableIsEmpty("QT_QUICK_CONTROLS_STYLE")) {
         QQuickStyle::setStyle(QStringLiteral("org.kde.desktop"));
     }
+    //-----------------General settings-----------------UP
 
     // passing down KStandardActions to QML files
     qmlRegisterSingletonType<StandardActions>(
@@ -33,6 +35,14 @@ int main(int argc, char *argv[])
         });
 
     QQmlApplicationEngine engine;
+
+    //-----------------Setting up devices menu-----------------DOWN
+    // auto *model = new QStandardItemModel(&app);
+    // model->appendRow(new QStandardItem(QStringLiteral("Root A")));
+    // model->appendRow(new QStandardItem(QStringLiteral("Root B")));
+
+    // engine.rootContext()->setContextProperty(QStringLiteral("devices_model"), model);
+    //-----------------Setting up devices menu-----------------UP
 
     engine.rootContext()->setContextObject(new KLocalizedContext(&engine));
     engine.loadFromModule("me.glampi.inputeasegui", "Main");

@@ -3,7 +3,7 @@ import QtQuick.Layouts
 import QtQuick.Controls as QQC
 import org.kde.kirigami as Kirigami
 
-import me.glampi.inputeasegui 1.0
+import me.glampi.inputeasegui
 
 Rectangle {
    Kirigami.Theme.colorSet: Kirigami.Theme.Header
@@ -61,6 +61,7 @@ Rectangle {
             },
             Kirigami.Action {
                text: StandardActions.delete_action.text
+               // text: TestSingleton.userName
                icon.name: StandardActions.delete_action.iconName
                tooltip: i18nc("@info:tooltip", "Delete selected item")
             }
