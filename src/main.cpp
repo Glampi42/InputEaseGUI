@@ -7,6 +7,7 @@
 #include <KLocalizedContext>
 #include <KLocalizedString>
 #include <KIconTheme>
+#include <KDescendantsProxyModel>
 
 int main(int argc, char *argv[])
 {
@@ -28,11 +29,15 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
 
     //-----------------Setting up devices menu-----------------DOWN
-    // auto *model = new QStandardItemModel(&app);
-    // model->appendRow(new QStandardItem(QStringLiteral("Root A")));
-    // model->appendRow(new QStandardItem(QStringLiteral("Root B")));
+    auto* source_model = new QStandardItemModel;
+    source_model->appendRow(new QStandardItem(QStringLiteral("Root A")));
+    source_model->appendRow(new QStandardItem(QStringLiteral("Root B")));
+    source_model->appendRow(new QStandardItem(QStringLiteral("Root C")));
 
-    // engine.rootContext()->setContextProperty(QStringLiteral("devices_model"), model);
+    // auto* model = new KDescendantsProxyModel(&app);
+    // model->setSourceModel(source_model);
+
+    engine.rootContext()->setContextProperty(QStringLiteral("devices_model"), source_model);
     //-----------------Setting up devices menu-----------------UP
 
     engine.rootContext()->setContextObject(new KLocalizedContext(&engine));

@@ -10,6 +10,7 @@ Rectangle {
    Kirigami.Theme.inherit: false
    color: Kirigami.Theme.backgroundColor
 
+   // add small padding around the toolbar
    implicitHeight: header_row.implicitHeight + Kirigami.Units.smallSpacing*2
    implicitWidth: header_row.implicitWidth + Kirigami.Units.smallSpacing*2
 
@@ -30,7 +31,7 @@ Rectangle {
 
          actions: [
             Kirigami.Action {
-               text: i18nc("@action:intoolbar create new arbitrary item", "New")
+               text: i18nc("@action:intoolbar create new list entry", "New")
                icon.name: "list-add"
 
                Kirigami.Action {

@@ -29,6 +29,7 @@ target_link_libraries(inputeasegui_start
     KF6::IconThemes
     KF6::ConfigCore
     KF6::ConfigGui
+    KF6::ItemModels
     inputeasegui_helpers
 )
 
