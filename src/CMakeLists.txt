@@ -36,4 +36,6 @@ target_link_libraries(inputeasegui_start
 add_subdirectory(helpers)
 add_subdirectory(custom)
 
+target_compile_options(inputeasegui_start PRIVATE -Wno-missing-include-dirs)
+
 install(TARGETS inputeasegui_start ${KDE_INSTALL_TARGETS_DEFAULT_ARGS})
