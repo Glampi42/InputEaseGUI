@@ -1,6 +1,13 @@
 cmake_minimum_required(VERSION 3.20)
 project(input_ease_gui)
 
+execute_process(
+    COMMAND qmake6 -query QT_INSTALL_QML
+    OUTPUT_VARIABLE QT_QML_DIR
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+list(APPEND CMAKE_PREFIX_PATH "${QT_QML_DIR}")
+
 find_package(ECM 6.0.0 REQUIRED NO_MODULE)
 set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
 

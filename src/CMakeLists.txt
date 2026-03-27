@@ -34,5 +34,6 @@ target_link_libraries(inputeasegui_start
 )
 
 add_subdirectory(helpers)
+add_subdirectory(custom)
 
 install(TARGETS inputeasegui_start ${KDE_INSTALL_TARGETS_DEFAULT_ARGS})

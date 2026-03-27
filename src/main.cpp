@@ -9,6 +9,8 @@
 #include <KIconTheme>
 #include <KDescendantsProxyModel>
 
+#include "custom/devicestreemodel.h"
+
 int main(int argc, char *argv[])
 {
     //-----------------General settings-----------------DOWN
@@ -29,15 +31,18 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
 
     //-----------------Setting up devices menu-----------------DOWN
-    auto* source_model = new QStandardItemModel;
-    source_model->appendRow(new QStandardItem(QStringLiteral("Root A")));
-    source_model->appendRow(new QStandardItem(QStringLiteral("Root B")));
-    source_model->appendRow(new QStandardItem(QStringLiteral("Root C")));
+    auto* source_model = new DevicesTreeModel;
+    source_model->addRootItem(new IEDevice(QStringLiteral("Root A")));
+    auto* deviceB = new IEDevice(QStringLiteral("Root B"));
+    source_model->addRootItem(deviceB);
+    source_model->addChildItem(deviceB, new IEGesture(QStringLiteral("Child 1")));
+    source_model->addChildItem(deviceB, new IEGesture(QStringLiteral("Child 2")));
+    source_model->addRootItem(new IEDevice(QStringLiteral("Root C")));
 
-    // auto* model = new KDescendantsProxyModel(&app);
-    // model->setSourceModel(source_model);
+    auto* model = new KDescendantsProxyModel(&app);
+    model->setSourceModel(source_model);
 
-    engine.rootContext()->setContextProperty(QStringLiteral("devices_model"), source_model);
+    engine.rootContext()->setContextProperty(QStringLiteral("devices_model"), model);
     //-----------------Setting up devices menu-----------------UP
 
     engine.rootContext()->setContextObject(new KLocalizedContext(&engine));

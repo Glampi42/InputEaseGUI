@@ -1,0 +1,9 @@
+target_sources(inputeasegui_start
+   PRIVATE
+   iegesture.h
+   iegesture.cpp
+   iedevice.h
+   iedevice.cpp
+   devicestreemodel.h
+   devicestreemodel.cpp
+)
