@@ -35,15 +35,15 @@ Rectangle {
                icon.name: "list-add"
 
                Kirigami.Action {
-                  text: i18nc("@action:intoolbar", "New gesture…")
-                  icon.name: "document-new"
-               }
-
-               Kirigami.Action {
                   id: new_device_action
 
                   text: i18nc("@action:intoolbar", "New device")
                   icon.name: "input-keyboard"
+               }
+
+               Kirigami.Action {
+                  text: i18nc("@action:intoolbar", "New gesture…")
+                  icon.name: "document-new"
                }
             },
             Kirigami.Action {
