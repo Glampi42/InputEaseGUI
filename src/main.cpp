@@ -10,6 +10,7 @@
 #include <KDescendantsProxyModel>
 
 #include "custom/devicestreemodel.h"
+#include "custom/devicesproxymodel.h"
 
 int main(int argc, char *argv[])
 {
@@ -39,7 +40,7 @@ int main(int argc, char *argv[])
     source_model->addChildItem(deviceB, new IEGesture(QStringLiteral("Child 2")));
     source_model->addRootItem(new IEDevice(QStringLiteral("Root C")));
 
-    auto* model = new KDescendantsProxyModel(&app);
+    auto* model = new DevicesProxyModel(&app);
     model->setSourceModel(source_model);
 
     engine.rootContext()->setContextProperty(QStringLiteral("devices_model"), model);
