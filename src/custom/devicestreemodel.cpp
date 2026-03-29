@@ -87,6 +87,9 @@ QVariant DevicesTreeModel::data(const QModelIndex &index, int role) const
         case IsGesture:
             return false;
 
+        case IsLastGesture:
+            return false;
+
         default:
             return {};
         }
@@ -102,6 +105,9 @@ QVariant DevicesTreeModel::data(const QModelIndex &index, int role) const
     case IsGesture:
         return true;
 
+    case IsLastGesture:
+        return index.row() == parentRoot->childCount() - 1;
+
     default:
         return {};
     }
@@ -112,6 +118,7 @@ QHash<int, QByteArray> DevicesTreeModel::roleNames() const
     return {
         {Name, "nameRole"},
         {IsGesture, "isGestureRole"},
+        {IsLastGesture, "isLastGestureRole"},
     };
 }
 

@@ -18,6 +18,7 @@ public:
     enum Roles {
         Name = Qt::UserRole + 1,
         IsGesture = Qt::UserRole + 2,
+        IsLastGesture = Qt::UserRole + 3,// whether the gesture is the last gesture of the device; this is used for the tree branch symbol correct display
         // add further roles here and mirror them in roleNames() / data()
     };
     Q_ENUM(Roles)

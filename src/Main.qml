@@ -29,6 +29,7 @@ Kirigami.ApplicationWindow {
    pageStack.initialPage: Kirigami.Page {
       id: main_page
 
+      //-------------General properties-------------DOWN
       // Qt.LeftToRight for English, Qt.RightToLeft for Arabic
       property int text_alignment: Qt.application.layoutDirection
       property int text_alignment_reverse: Qt.application.layoutDirection === Qt.LeftToRight ? Qt.RightToLeft : Qt.LeftToRight
@@ -36,7 +37,14 @@ Kirigami.ApplicationWindow {
       // Qt.AlignLeft for English, Qt.AlignRight for Arabic
       property int layout_alignment: Qt.application.layoutDirection === Qt.LeftToRight ? Qt.AlignLeft : Qt.AlignRight
       property int layout_alignment_reverse: Qt.application.layoutDirection === Qt.LeftToRight ? Qt.AlignRight : Qt.AlignLeft
+      //-------------General properties-------------UP
 
+      //-------------DevicesPage properties-------------DOWN
+      property int deviceInset: Kirigami.Units.smallSpacing
+      property int devicePadding: deviceInset + Kirigami.Units.smallSpacing + Kirigami.Units.iconSizes.small + Kirigami.Units.smallSpacing
+      property int gestureInset: Kirigami.Units.smallSpacing*2 + Kirigami.Units.iconSizes.small + Kirigami.Units.largeSpacing
+      property int gesturePadding: gestureInset + Kirigami.Units.smallSpacing
+      //-------------DevicesPage properties-------------UP
       padding: 0
 
       QQC.SplitView {
@@ -47,7 +55,8 @@ Kirigami.ApplicationWindow {
 
          // page with the devices
          DevicesPage {
-            QQC.SplitView.minimumWidth: 50
+            // at minimalWidth, one can still see what item is selected
+            QQC.SplitView.minimumWidth: main_page.gesturePadding
             QQC.SplitView.preferredWidth: 0.3820 * root.window_width // golden ratio
          }
 
