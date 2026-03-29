@@ -41,8 +41,8 @@ Kirigami.ApplicationWindow {
 
       //-------------DevicesPage properties-------------DOWN
       property int deviceInset: Kirigami.Units.smallSpacing
-      property int devicePadding: deviceInset + Kirigami.Units.smallSpacing + Kirigami.Units.iconSizes.small + Kirigami.Units.smallSpacing
-      property int gestureInset: Kirigami.Units.smallSpacing*2 + Kirigami.Units.iconSizes.small + Kirigami.Units.largeSpacing
+      property int devicePadding: deviceInset + Kirigami.Units.smallSpacing + Kirigami.Units.smallSpacing + Kirigami.Units.iconSizes.small + Kirigami.Units.smallSpacing + Kirigami.Units.smallSpacing
+      property int gestureInset: Kirigami.Units.smallSpacing*3 + Kirigami.Units.iconSizes.small + Kirigami.Units.smallSpacing
       property int gesturePadding: gestureInset + Kirigami.Units.smallSpacing
       //-------------DevicesPage properties-------------UP
       padding: 0

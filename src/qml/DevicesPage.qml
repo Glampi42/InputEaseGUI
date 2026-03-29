@@ -75,10 +75,10 @@ Kirigami.ScrollablePage {
                }
             }
 
-            // branch symbol for gestures, like in a tree view
+            // --- Branch symbol like in a tree view (gestures only) ------------------------
             Item {
                anchors.left: parent.left
-               anchors.leftMargin: Kirigami.Units.smallSpacing*2
+               anchors.leftMargin: Kirigami.Units.smallSpacing * 3
                anchors.verticalCenter: parent.verticalCenter
                visible: tree_delegate.isGestureRole
                width: Kirigami.Units.iconSizes.small
@@ -86,48 +86,81 @@ Kirigami.ScrollablePage {
 
                // Vertical line (full height for T-pipe, half height for L-pipe)
                Rectangle {
-                  x: parent.width / 2 - 0.5 // -0.5 to compensate for the even width of both (the T-pipe and the devices' arrow button should align)
+                  x: parent.width / 2 - 0.5 // -0.5 to compensate for the 1px width (the T-pipe and the devices' arrow button should align)
                   width: 1
-                  height: tree_delegate.isLastGestureRole ? parent.height / 2 + 1 : parent.height
-                  color: Kirigami.Theme.disabledTextColor
-                  opacity: 0.4
+                  height: tree_delegate.isLastGestureRole ? parent.height / 2 : parent.height
+
+                  color: Kirigami.ColorUtils.linearInterpolation(Kirigami.Theme.backgroundColor, Kirigami.Theme.textColor, Kirigami.Theme.frameContrast)
+
                   anchors.top: parent.top
                }
 
                // Horizontal stub
                Rectangle {
-                  x: parent.width / 2 - 0.5 + 1 // plus one pixel so that the vertical and horizontal lines don't overlap
+                  x: parent.width / 2 - 0.5
                   y: parent.height / 2
-                  width: parent.width / 2 - 1
+                  width: parent.width / 2
                   height: 1
-                  color: Kirigami.Theme.disabledTextColor
-                  opacity: 0.4
+
+                  color: Kirigami.ColorUtils.linearInterpolation(Kirigami.Theme.backgroundColor, Kirigami.Theme.textColor, Kirigami.Theme.frameContrast)
                }
             }
 
-            // collapse/expand arrow for devices
-            Kirigami.Icon {
+            // --- Collapse/expand arrow (devices only) -------------------------------------
+            Rectangle {
+               id: arrow_button
+
                anchors.left: parent.left
                anchors.leftMargin: Kirigami.Units.smallSpacing * 2
                anchors.verticalCenter: parent.verticalCenter
-
                visible: !tree_delegate.isGestureRole
-               source: "arrow-right"
-               width: Kirigami.Units.iconSizes.small
-               height: width
-               isMask: true
 
-               rotation: tree_delegate.kDescendantExpanded ? 90 : 0
-               Behavior on rotation {
-                  NumberAnimation {
-                     duration: Kirigami.Units.shortDuration
-                     easing.type: Easing.InOutCubic
+               // Slightly larger than the icon so the outline has a small margin
+               width: Kirigami.Units.iconSizes.small + Kirigami.Units.smallSpacing * 2
+               height: width
+               radius: Kirigami.Units.smallSpacing
+
+               color: arrowArea.containsPress ? Kirigami.Theme.highlightColor : "transparent"
+               border.color: Kirigami.Theme.highlightColor
+               border.width: arrowArea.containsMouse ? 1 : 0
+
+               // the actual arrow
+               Kirigami.Icon {
+                  anchors.centerIn: parent
+                  source: "arrow-right"
+                  width: Kirigami.Units.iconSizes.small
+                  height: width
+                  isMask: true
+
+                  rotation: tree_delegate.kDescendantExpanded ? 90 : 0
+                  Behavior on rotation {
+                     NumberAnimation {
+                        duration: Kirigami.Units.shortDuration
+                        easing.type: Easing.InOutCubic
+                     }
+                  }
+               }
+
+               // Dedicated input area for the arrow.
+               // hoverEnabled drives the outline via containsMouse.
+               // By accepting the mouse press (Qt default), it prevents
+               // the event from reaching the parent delegate's button
+               // handler, so onClicked on the delegate will not fire.
+               MouseArea {
+                  id: arrowArea
+                  anchors.fill: parent
+                  hoverEnabled: true
+                  onClicked: {
+                     if (tree_delegate.kDescendantExpanded)
+                        devices_model.collapse(tree_delegate.index);
+                     else
+                        devices_model.expand(tree_delegate.index);
                   }
                }
             }
          }
 
-         //------------Collapse/expand animations------------DOWN
+         //-----------------Collapse/expand animations-----------------DOWN
          add: Transition {
             NumberAnimation {
                property: "opacity"
@@ -166,7 +199,7 @@ Kirigami.ScrollablePage {
                easing.type: Easing.InOutCubic
             }
          }
-         //------------Collapse/expand animations------------UP
+         //-----------------Collapse/expand animations-----------------UP
       }
    }
 }
