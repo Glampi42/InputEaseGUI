@@ -21,8 +21,14 @@ Kirigami.ScrollablePage {
       RoundedItemDelegate {
          Layout.fillWidth: true
 
+         highlighted: devices_tree.model.selectedGeneralSettings
+
          text: i18nc("@item:inmenu", "General Settings")
          icon.name: "configure"
+
+         onClicked: {
+            devices_tree.model.selectedGeneralSettings = true;
+         }
       }
 
       Item {
@@ -62,11 +68,20 @@ Kirigami.ScrollablePage {
             required property bool isLastGestureRole
 
             text: nameRole
+            highlighted: isGestureRole ? devices_tree.model.selectedGesture === index : devices_tree.model.selectedDevice === index
 
             leftInset: isGestureRole ? main_page.gestureInset : main_page.deviceInset
             leftPadding: isGestureRole ? main_page.gesturePadding : main_page.devicePadding
 
             onClicked: {
+               if (!isGestureRole) {
+                  devices_tree.model.selectedDevice = index;
+               } else {
+                  devices_tree.model.selectedGesture = index;
+               }
+            }
+
+            onDoubleClicked: {
                if (!isGestureRole) {
                   if (kDescendantExpanded)
                      devices_model.collapse(tree_delegate.index);
@@ -178,6 +193,10 @@ Kirigami.ScrollablePage {
          }
 
          remove: Transition {
+            PropertyAction {
+               property: "highlighted"
+               value: false
+            }
             NumberAnimation {
                property: "opacity"
                to: 0

@@ -36,29 +36,53 @@ public:
                   int role = Qt::DisplayRole) const override;
     QHash<int, QByteArray> roleNames() const override;
 
+    /**
+     * @brief Constructs the QModelIndex pointing to the specified device.
+     * @param device
+     * @return QModelIndex
+     */
+    QModelIndex modelIndexFromPtr(IEDevice* device);
+    /**
+     * @brief Constructs the QModelIndex pointing to the specified gesture.
+     * @param gesture
+     * @return QModelIndex
+     */
+    QModelIndex modelIndexFromPtr(IEGesture* gesture);
+    /**
+     * @brief Retrieves the pointer pointing to the specified device.
+     * @param deviceIdx
+     * @return Device ptr
+     */
+    IEDevice* modelIndexToDevice(QModelIndex deviceIdx);
+    /**
+     * @brief Retrieves the pointer pointing to the specified gesture.
+     * @param gestureIdx
+     * @return Gesture ptr
+     */
+    IEGesture* modelIndexToGesture(QModelIndex gestureIdx);
+
     // Dynamic mutation API
     void addRootItem(IEDevice* item);
     void addChildItem(IEDevice* parentItem, IEGesture* child);
 
+    bool getSelectedGeneralSettings() { return m_selectedGeneralSettings; }
+    void setSelectedGeneralSettings(bool selected) { m_selectedGeneralSettings = selected; }
+    IEDevice* getSelectedDevice() { return m_selectedDevice; }
+    void setSelectedDevice(IEDevice* device) { m_selectedDevice = device; }
+    IEGesture* getSelectedGesture() { return m_selectedGesture; }
+    void setSelectedGesture(IEGesture* gesture) { m_selectedGesture = gesture; }
+
 private:
     /**
-     * @brief DevicesTreeModel::deviceRow
+     * @brief DevicesTreeModel::deviceIndex
      * @param device
-     * @return The row of the device in the device tree.
+     * @return The index of the device in the unflattened device tree.
      */
-    int deviceRow(const IEDevice* device) const;
-    /**
-     * @brief Calculates the index of this device in the tree.
-     * @param device
-     * @return The index
-     */
-    int calculateIndex(const IEDevice* device) const;
-    /**
-     * @brief Calculates the index of this gesture in the tree.
-     * @param gesture
-     * @return The index
-     */
-    int calculateIndex(const IEGesture* gesture) const;
+    int deviceIndex(const IEDevice* device) const { return m_devices.indexOf(device); }
 
     QList<IEDevice*> m_devices;
+
+    bool m_selectedGeneralSettings;
+    IEDevice* m_selectedDevice;
+    IEGesture* m_selectedGesture;
 };

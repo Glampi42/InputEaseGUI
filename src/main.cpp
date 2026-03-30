@@ -36,8 +36,8 @@ int main(int argc, char *argv[])
     source_model->addRootItem(new IEDevice(QStringLiteral("Root A")));
     auto* deviceB = new IEDevice(QStringLiteral("Root B"));
     source_model->addRootItem(deviceB);
-    source_model->addChildItem(deviceB, new IEGesture(QStringLiteral("Child 1")));
-    source_model->addChildItem(deviceB, new IEGesture(QStringLiteral("Child 2")));
+    source_model->addChildItem(deviceB, new IEGesture(QStringLiteral("Child 1"), deviceB));
+    source_model->addChildItem(deviceB, new IEGesture(QStringLiteral("Child 2"), deviceB));
     source_model->addRootItem(new IEDevice(QStringLiteral("Root C")));
 
     auto* model = new DevicesProxyModel(&app);

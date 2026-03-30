@@ -6,7 +6,11 @@
 
 DevicesTreeModel::DevicesTreeModel(QObject* parent)
     : QAbstractItemModel(parent)
-{}
+{
+    m_selectedGeneralSettings = true;// general settings selected on startup
+    m_selectedDevice = nullptr;
+    m_selectedGesture = nullptr;
+}
 
 DevicesTreeModel::~DevicesTreeModel()
 {
@@ -17,7 +21,7 @@ DevicesTreeModel::~DevicesTreeModel()
 // Core QAbstractItemModel interface
 // ---------------------------------------------------------------------------
 
-QModelIndex DevicesTreeModel::index(int row, int column, const QModelIndex &parent) const
+QModelIndex DevicesTreeModel::index(int row, int column, const QModelIndex& parent) const
 {
     if (!hasIndex(row, column, parent))
         return {};
@@ -34,7 +38,7 @@ QModelIndex DevicesTreeModel::index(int row, int column, const QModelIndex &pare
     return createIndex(row, column, rootItem);
 }
 
-QModelIndex DevicesTreeModel::parent(const QModelIndex &child) const
+QModelIndex DevicesTreeModel::parent(const QModelIndex& child) const
 {
     if (!child.isValid())
         return {};
@@ -46,10 +50,10 @@ QModelIndex DevicesTreeModel::parent(const QModelIndex &child) const
         return {};
 
     // Non-null  →  child is a leaf; parent is the stored RootItem.
-    return createIndex(deviceRow(parentRoot), 0, nullptr);
+    return createIndex(deviceIndex(parentRoot), 0, nullptr);
 }
 
-int DevicesTreeModel::rowCount(const QModelIndex &parent) const
+int DevicesTreeModel::rowCount(const QModelIndex& parent) const
 {
     if (!parent.isValid())
         return m_devices.size();
@@ -64,12 +68,12 @@ int DevicesTreeModel::rowCount(const QModelIndex &parent) const
     return 0; // leaf nodes have no children
 }
 
-int DevicesTreeModel::columnCount(const QModelIndex & /*parent*/) const
+int DevicesTreeModel::columnCount(const QModelIndex& /*parent*/) const
 {
     return 1; // single-column tree for QML TreeView
 }
 
-QVariant DevicesTreeModel::data(const QModelIndex &index, int role) const
+QVariant DevicesTreeModel::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid())
         return {};
@@ -122,6 +126,29 @@ QHash<int, QByteArray> DevicesTreeModel::roleNames() const
     };
 }
 
+QModelIndex DevicesTreeModel::modelIndexFromPtr(IEDevice* device) {
+    return index(deviceIndex(device), 0);
+}
+
+QModelIndex DevicesTreeModel::modelIndexFromPtr(IEGesture* gesture) {
+    return index(gesture->parentDevice()->gestureIndex(gesture), 0, modelIndexFromPtr(gesture->parentDevice()));
+}
+
+IEDevice* DevicesTreeModel::modelIndexToDevice(QModelIndex deviceIdx) {
+    if(deviceIdx.row() >= m_devices.count())
+        return nullptr;
+
+    return m_devices[deviceIdx.row()];
+}
+
+IEGesture* DevicesTreeModel::modelIndexToGesture(QModelIndex gestureIdx) {
+    IEDevice* parentDevice = static_cast<IEDevice*>(gestureIdx.internalPointer());
+    if(parentDevice == nullptr)
+        return nullptr;
+
+    return parentDevice->childAt(gestureIdx.row());
+}
+
 // ---------------------------------------------------------------------------
 // Dynamic mutation API
 // ---------------------------------------------------------------------------
@@ -136,7 +163,7 @@ void DevicesTreeModel::addRootItem(IEDevice* item)
 
 void DevicesTreeModel::addChildItem(IEDevice* parentItem, IEGesture* child)
 {
-    const int pRow = deviceRow(parentItem);
+    const int pRow = deviceIndex(parentItem);
     if (pRow < 0)
         return;
 
@@ -145,12 +172,4 @@ void DevicesTreeModel::addChildItem(IEDevice* parentItem, IEGesture* child)
     beginInsertRows(parentIndex, childRow, childRow);
     parentItem->addChild(child);
     endInsertRows();
-}
-
-// ---------------------------------------------------------------------------
-// Private helpers
-// ---------------------------------------------------------------------------
-int DevicesTreeModel::deviceRow(const IEDevice* device) const
-{
-    return m_devices.indexOf(device);
 }

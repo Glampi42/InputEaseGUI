@@ -23,6 +23,8 @@ public:
     const QList<IEGesture*> &children() const { return m_gestures; }
     void addChild(IEGesture* child) { m_gestures.append(child); }
 
+    int gestureIndex(IEGesture* gesture) const { return m_gestures.indexOf(gesture); }
+
 private:
     QString m_name;
     QList<IEGesture*> m_gestures;

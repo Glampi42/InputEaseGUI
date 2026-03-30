@@ -12,8 +12,9 @@ class IEDevice;
 class IEGesture
 {
 public:
-public:
-    explicit IEGesture(const QString &name) : m_name(name) {}
+    explicit IEGesture(const QString& name, IEDevice* parent) : m_name(name) {
+        m_parentDevice = parent;
+    }
 
     QString name() const { return m_name; }
     IEDevice* parentDevice() const {return m_parentDevice; }
