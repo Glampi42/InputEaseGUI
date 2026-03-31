@@ -25,9 +25,6 @@ Kirigami.Page {
       QQC.ItemDelegate {
          highlighted: devices_tree.model.selectedGeneralSettings
 
-         // leftInset: isGestureRole ? main_page.gestureInset : main_page.deviceInset
-         // leftPadding: isGestureRole ? main_page.gesturePadding : main_page.devicePadding
-
          topInset: 0
          topPadding: 0
          bottomInset: 0
@@ -181,7 +178,7 @@ Kirigami.Page {
                      // Slightly larger than the icon so the outline has a small margin
                      width: Kirigami.Units.iconSizes.small + Kirigami.Units.smallSpacing * 2
                      height: width
-                     // radius: Kirigami.Units.smallSpacing
+                     radius: Kirigami.Units.smallSpacing
 
                      color: arrowArea.containsPress ? Kirigami.Theme.highlightColor : "transparent"
                      border.color: Kirigami.Theme.highlightColor
@@ -218,6 +215,10 @@ Kirigami.Page {
                               devices_model.collapse(tree_delegate.index);
                            else
                               devices_model.expand(tree_delegate.index);
+                        }
+
+                        onDoubleClicked: {
+                           // nothing; this prevents double-clicks from collapsing/expanding the items twice in a row
                         }
                      }
                   }
