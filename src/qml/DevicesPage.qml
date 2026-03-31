@@ -4,14 +4,29 @@ import QtQuick.Controls as QQC
 import org.kde.kirigami as Kirigami
 import org.kde.kirigamiaddons.delegates
 
-Kirigami.Page {
-   leftPadding: 0
-   rightPadding: 0
-   topPadding: 0
-   bottomPadding: 0
+// Kirigami.Page {
+//    leftPadding: 0
+//    rightPadding: 0
+//    topPadding: 0
+//    bottomPadding: 0
 
+//    Kirigami.Theme.colorSet: Kirigami.Theme.View
+//    Kirigami.Theme.inherit: false
+
+//    // it was here
+// }
+Item {
    Kirigami.Theme.colorSet: Kirigami.Theme.View
    Kirigami.Theme.inherit: false
+
+   clip: true
+
+   // background
+   Rectangle {
+      anchors.fill: parent
+
+      color: Kirigami.Theme.backgroundColor
+   }
 
    ColumnLayout {
       anchors.fill: parent
@@ -23,24 +38,35 @@ Kirigami.Page {
       }
 
       QQC.ItemDelegate {
+         id: general_settings
+
          highlighted: devices_tree.model.selectedGeneralSettings
+
+         activeFocusOnTab: true
+         Keys.onReturnPressed: devices_tree.model.selectedGeneralSettings = true
+         Keys.onEnterPressed: devices_tree.model.selectedGeneralSettings = true
+
+         Keys.onDownPressed: {
+             devices_tree.forceActiveFocus()
+             devices_tree.currentIndex = 0
+         }
 
          topInset: 0
          topPadding: 0
          bottomInset: 0
          bottomPadding: 0
 
-         implicitHeight: Kirigami.Units.smallSpacing*2 + Kirigami.Units.iconSizes.small + Kirigami.Units.smallSpacing*2
+         implicitHeight: Kirigami.Units.smallSpacing * 2 + Kirigami.Units.iconSizes.small + Kirigami.Units.smallSpacing * 2
          Layout.fillWidth: true
 
          contentItem: RowLayout {
             spacing: Kirigami.Units.smallSpacing
 
             Kirigami.Icon {
-                source: "configure"
-                // this size matches the collapse/expand arrow button size on devices in the device_tree below
-                implicitWidth: Kirigami.Units.iconSizes.small + Kirigami.Units.smallSpacing*2
-                implicitHeight: implicitWidth
+               source: "configure"
+               // this size matches the collapse/expand arrow button size on devices in the device_tree below
+               implicitWidth: Kirigami.Units.iconSizes.small + Kirigami.Units.smallSpacing * 2
+               implicitHeight: implicitWidth
             }
 
             QQC.Label {
@@ -53,6 +79,8 @@ Kirigami.Page {
 
          onClicked: {
             devices_tree.model.selectedGeneralSettings = true;
+
+            forceActiveFocus()
          }
       }
 
@@ -87,6 +115,41 @@ Kirigami.Page {
             Layout.fillHeight: true
             clip: true
 
+            //---------------------Keyboard navigation---------------------DOWN
+            activeFocusOnTab: true
+
+            Keys.onReturnPressed: activateCurrentItem()
+            Keys.onEnterPressed: activateCurrentItem()
+
+            Keys.onUpPressed: {
+                if (currentIndex === 0)
+                    general_settings.forceActiveFocus()
+                else
+                    decrementCurrentIndex()
+            }
+
+            Keys.onRightPressed: {
+               const d = currentItem;
+               if (d && !d.isGestureRole && !d.kDescendantExpanded)
+                  devices_model.expand(d.index);
+            }
+            Keys.onLeftPressed: {
+               const d = currentItem;
+               if (d && !d.isGestureRole && d.kDescendantExpanded)
+                  devices_model.collapse(d.index);
+            }
+
+            function activateCurrentItem() {
+               const d = currentItem;
+               if (!d)
+                  return;
+               if (!d.isGestureRole)
+                  model.selectedDevice = d.index;
+               else
+                  model.selectedGesture = d.index;
+            }
+            //---------------------Keyboard navigation---------------------UP
+
             model: devices_model
 
             topMargin: Kirigami.Units.smallSpacing
@@ -113,7 +176,7 @@ Kirigami.Page {
                bottomInset: 0
                bottomPadding: 0
 
-               height: Kirigami.Units.smallSpacing*2 + Kirigami.Units.iconSizes.small + Kirigami.Units.smallSpacing*2
+               height: Kirigami.Units.smallSpacing * 2 + Kirigami.Units.iconSizes.small + Kirigami.Units.smallSpacing * 2
                width: ListView.view?.width ?? 0
 
                onClicked: {
@@ -122,6 +185,9 @@ Kirigami.Page {
                   } else {
                      devices_tree.model.selectedGesture = index;
                   }
+
+                  devices_tree.currentIndex = index
+                  devices_tree.forceActiveFocus()
                }
 
                onDoubleClicked: {
@@ -175,12 +241,22 @@ Kirigami.Page {
 
                      visible: !tree_delegate.isGestureRole
 
+                     Kirigami.Theme.colorSet: Kirigami.Theme.Selection
+                     Kirigami.Theme.inherit: false
+
                      // Slightly larger than the icon so the outline has a small margin
                      width: Kirigami.Units.iconSizes.small + Kirigami.Units.smallSpacing * 2
                      height: width
                      radius: Kirigami.Units.smallSpacing
 
-                     color: arrowArea.containsPress ? Kirigami.Theme.highlightColor : "transparent"
+                     color: {
+                        if (devices_tree.model.selectedDevice === tree_delegate.index) {// if this is the selected device
+                           (arrowArea.containsMouse && !arrowArea.containsPress) ? Kirigami.Theme.activeBackgroundColor : "transparent";
+                        } else {
+                           arrowArea.containsPress ? Kirigami.Theme.highlightColor : "transparent";
+                        }
+                     }
+
                      border.color: Kirigami.Theme.highlightColor
                      border.width: arrowArea.containsMouse ? 1 : 0
 
@@ -215,6 +291,11 @@ Kirigami.Page {
                               devices_model.collapse(tree_delegate.index);
                            else
                               devices_model.expand(tree_delegate.index);
+
+                           devices_tree.currentIndex = index// focus on this device when collapsing/expanding its gestures;
+                           // this avoids the issue of when a gesture that was focused is collapsed and a random item
+                           // with the index of that gesture gets focused instead.
+                           devices_tree.forceActiveFocus()
                         }
 
                         onDoubleClicked: {
