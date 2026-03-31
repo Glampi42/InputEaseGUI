@@ -63,7 +63,7 @@ public:
 
     // Dynamic mutation API
     void addRootItem(IEDevice* item);
-    void addChildItem(IEDevice* parentItem, IEGesture* child);
+    void addChildItem(IEGesture* child);
 
     bool getSelectedGeneralSettings() { return m_selectedGeneralSettings; }
     void setSelectedGeneralSettings(bool selected) { m_selectedGeneralSettings = selected; }

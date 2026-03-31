@@ -33,12 +33,22 @@ int main(int argc, char *argv[])
 
     //-----------------Setting up devices menu-----------------DOWN
     auto* source_model = new DevicesTreeModel;
-    source_model->addRootItem(new IEDevice(QStringLiteral("Root A")));
+    auto* deviceA = new IEDevice(QStringLiteral("Root A"));
+    source_model->addRootItem(deviceA);
+    source_model->addChildItem(new IEGesture(QStringLiteral("Child 1"), deviceA));
+    source_model->addChildItem(new IEGesture(QStringLiteral("Child 2"), deviceA));
     auto* deviceB = new IEDevice(QStringLiteral("Root B"));
     source_model->addRootItem(deviceB);
-    source_model->addChildItem(deviceB, new IEGesture(QStringLiteral("Child 1"), deviceB));
-    source_model->addChildItem(deviceB, new IEGesture(QStringLiteral("Child 2"), deviceB));
-    source_model->addRootItem(new IEDevice(QStringLiteral("Root C")));
+    source_model->addChildItem(new IEGesture(QStringLiteral("Child 3"), deviceB));
+    source_model->addChildItem(new IEGesture(QStringLiteral("Child 4"), deviceB));
+    source_model->addChildItem(new IEGesture(QStringLiteral("Child 5"), deviceB));
+    auto* deviceC = new IEDevice(QStringLiteral("Root C"));
+    source_model->addRootItem(deviceC);
+    source_model->addChildItem(new IEGesture(QStringLiteral("Child 6"), deviceC));
+    source_model->addChildItem(new IEGesture(QStringLiteral("Child 7"), deviceC));
+    source_model->addChildItem(new IEGesture(QStringLiteral("Child 8"), deviceC));
+    source_model->addChildItem(new IEGesture(QStringLiteral("Child 9"), deviceC));
+    source_model->addChildItem(new IEGesture(QStringLiteral("Child 42 lololol"), deviceC));
 
     auto* model = new DevicesProxyModel(&app);
     model->setSourceModel(source_model);

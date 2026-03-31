@@ -161,15 +161,15 @@ void DevicesTreeModel::addRootItem(IEDevice* item)
     endInsertRows();
 }
 
-void DevicesTreeModel::addChildItem(IEDevice* parentItem, IEGesture* child)
+void DevicesTreeModel::addChildItem(IEGesture* child)
 {
-    const int pRow = deviceIndex(parentItem);
+    const int pRow = deviceIndex(child->parentDevice());
     if (pRow < 0)
         return;
 
     const QModelIndex parentIndex = createIndex(pRow, 0, nullptr);
-    const int childRow = parentItem->childCount();
+    const int childRow = child->parentDevice()->childCount();
     beginInsertRows(parentIndex, childRow, childRow);
-    parentItem->addChild(child);
+    child->parentDevice()->addChild(child);
     endInsertRows();
 }
