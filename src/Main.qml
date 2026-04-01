@@ -51,62 +51,96 @@ Kirigami.ApplicationWindow {
       //-------------------Error pop-ups-------------------DOWN
       // FATAL — dismiss exits the app, no background dismiss
       Kirigami.PromptDialog {
-          id: fatalErrorDialog
-          title: i18nc("@title:window", "Critical Error")
-          property string message: ""
-          subtitle: message
-          standardButtons: Kirigami.Dialog.Close
-          closePolicy: QQC.Popup.NoAutoClose
+         id: fatalErrorDialog
+         title: i18nc("@title:window", "Critical Error")
+         property string message: ""
+         subtitle: message
+         standardButtons: Kirigami.Dialog.Close
+         closePolicy: QQC.Popup.NoAutoClose
 
-          onRejected: Qt.quit()
+         onRejected: Qt.quit()
       }
 
       // NON-FATAL — dismiss keeps app open, no background dismiss
       Kirigami.PromptDialog {
-          id: errorDialog
-          title: i18nc("@title:window", "Error")
-          property string message: ""
-          subtitle: message
-          standardButtons: Kirigami.Dialog.Close
-          closePolicy: QQC.Popup.NoAutoClose
+         id: errorDialog
+         title: i18nc("@title:window", "Error")
+         property string message: ""
+         subtitle: message
+         standardButtons: Kirigami.Dialog.Close
+         closePolicy: QQC.Popup.NoAutoClose
 
-          onRejected: errorDialog.close()
+         onRejected: errorDialog.close()
       }
 
-      // CORRUPT CONFIG — reset or exit the app, no background dismiss
+      // CORRUPT CONFIG — clear config or exit the app, no background dismiss
       Kirigami.PromptDialog {
-          id: corruptConfigDialog
-          title: i18nc("@title:window", "Config File Corrupted")
-          property string message: ""
-          subtitle: message
-          standardButtons: Kirigami.Dialog.Yes | Kirigami.Dialog.No
-          closePolicy: QQC.Popup.NoAutoClose
+         id: corruptConfigDialog
+         title: i18nc("@title:window", "Config File Corrupted")
+         property string message: ""
+         subtitle: message
+         standardButtons: Kirigami.Dialog.Yes | Kirigami.Dialog.No
+         closePolicy: QQC.Popup.NoAutoClose
 
-          onAccepted: {
-             config.clear()
-             corruptConfigDialog.close()
-          }
-          onRejected: Qt.quit()
+         onAccepted: {
+            yesNoDialog.ask(i18nc("@title:window yes/no pop-up", "Clear the config?"),
+                            i18nc("@info subtitle of a yes/no pop-up", "This action cannot be undone."),
+            function (confirmed) {
+               if (confirmed) {
+                  config.clear();
+               } else {
+                  Qt.quit();
+               }
+            });
+         }
+         onRejected: Qt.quit()
+      }
+
+      // YES/NO confirmation dialog
+      // usage: yesNoDialog.ask("Delete file?", "This action cannot be undone.",
+      // function(confirmed) { if(confirmed) { file.delete(); } else { file.dontDelete(); } })
+      Kirigami.PromptDialog {
+         id: yesNoDialog
+         standardButtons: Kirigami.Dialog.Yes | Kirigami.Dialog.No
+
+         property string _title: ""
+         property string _subtitle: ""
+         property var callback: null
+
+         title: _title
+         subtitle: _subtitle
+
+         function ask(__title, __subtitle, __callback) {
+            _title = __title;
+            _subtitle = __subtitle;
+            callback = __callback;
+            open();
+         }
+
+         onAccepted: if (callback)
+            callback(true)
+         onRejected: if (callback)
+            callback(false)
       }
 
       Connections {
-          target: config
-          function onFatalError(message) {
-              fatalErrorDialog.message = message
-              fatalErrorDialog.open()
-          }
-          function onError(message) {
-              errorDialog.message = message
-              errorDialog.open()
-          }
-          function onConfigCorrupted(message) {
-              corruptConfigDialog.message = message
-              corruptConfigDialog.open()
-          }
-          // function onAppNotFound() {
-          //     fatalErrorDialog.message = "InputActions is not installed or could not be found."
-          //     fatalErrorDialog.open()
-          // }
+         target: config
+         function onFatalError(message) {
+            fatalErrorDialog.message = message;
+            fatalErrorDialog.open();
+         }
+         function onError(message) {
+            errorDialog.message = message;
+            errorDialog.open();
+         }
+         function onConfigCorrupted(message) {
+            corruptConfigDialog.message = message;
+            corruptConfigDialog.open();
+         }
+         // function onAppNotFound() {
+         //     fatalErrorDialog.message = "InputActions is not installed or could not be found."
+         //     fatalErrorDialog.open()
+         // }
       }
       //-------------------Error pop-ups-------------------UP
 
