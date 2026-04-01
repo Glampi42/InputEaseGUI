@@ -88,9 +88,11 @@ Rectangle {
                tooltip: i18nc("@info:tooltip", "Save changes to the config file")
             },
             Kirigami.Action {
-               text: i18nc("@action:intoolbar", "GoTo Config")
-               icon.name: "go-parent-folder"
-               tooltip: i18nc("@info:tooltip", "Open folder containing the config file")
+               text: i18nc("@action:intoolbar", "Open Config")
+               icon.name: "document-open"
+               tooltip: i18nc("@info:tooltip", "Open the config file in text editor")
+
+               onTriggered: Qt.openUrlExternally("file://" + config.configPath)
             }
          ]
       }

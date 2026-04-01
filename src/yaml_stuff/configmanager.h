@@ -17,6 +17,10 @@ public:
     bool save();
     Q_INVOKABLE bool clear();
 
+    Q_PROPERTY(QString configPath READ configPath CONSTANT)
+
+    QString configPath() const { return m_configPath; }
+
     // Example typed accessors
     QString testString() const;
     void setTestString(const QString& str);
