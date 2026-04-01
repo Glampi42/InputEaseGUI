@@ -13,6 +13,8 @@ import org.kde.kirigamiaddons.delegates
 //    Kirigami.Theme.colorSet: Kirigami.Theme.View
 //    Kirigami.Theme.inherit: false
 
+//    clip: true
+
 //    // it was here
 // }
 Item {

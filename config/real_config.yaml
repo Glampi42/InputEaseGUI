@@ -1,0 +1,480 @@
+touchpad:
+    delta_multiplier: 1.5
+
+    gestures:
+        #------------------Application-specific config------------------DOWN
+        # # previous tab / Firefox, VSCode
+        # - type: swipe
+        #   fingers: 3
+        #   direction: left
+        #
+        #   conditions:
+        #     - $keyboard_modifiers == []
+        #     - $window_class one_of [ firefox_firefox, Code ]
+        #
+        #   actions:
+        #     - on: begin
+        #       input:
+        #         - keyboard: [ leftctrl+pageup ]
+        #
+        # # next tab / Firefox, VSCode
+        # - type: swipe
+        #   fingers: 3
+        #   direction: right
+        #
+        #   conditions:
+        #     - $keyboard_modifiers == []
+        #     - $window_class one_of [ firefox_firefox, Code ]
+        #
+        #   actions:
+        #     - on: begin
+        #       input:
+        #         - keyboard: [ leftctrl+pagedown ]
+        #------------------Application-specific config------------------UP
+
+        # cycle through open applications / global
+        - type: tap
+          fingers: 4
+
+          conditions:
+            - $keyboard_modifiers == []
+            - any:
+              - $finger_1_position_percentage between 0,0;1,0.5
+              - $finger_2_position_percentage between 0,0;1,0.5
+              - $finger_3_position_percentage between 0,0;1,0.5
+              - $finger_4_position_percentage between 0,0;1,0.5
+
+          actions:
+            - on: begin
+              plasma_shortcut: kwin,Walk Through Windows
+
+        # cycle through open applications (reverse) / global
+        - type: tap
+          fingers: 4
+
+          conditions:
+            - $keyboard_modifiers == []
+            - all:
+              - $finger_1_position_percentage between 0,0.5;1,1
+              - $finger_2_position_percentage between 0,0.5;1,1
+              - $finger_3_position_percentage between 0,0.5;1,1
+              - $finger_4_position_percentage between 0,0.5;1,1
+
+          actions:
+            - on: begin
+              plasma_shortcut: kwin,Walk Through Windows (Reverse)
+
+        # go back / global
+        - type: swipe
+          fingers: 3
+          direction: left
+
+          # swipe in the lower half of the touchpad OR hold down ctrl
+          conditions:
+            - any:
+              - all:
+                - $finger_1_initial_position_percentage between 0,0.4;1,1
+                - $finger_2_initial_position_percentage between 0,0.4;1,1
+                - $finger_3_initial_position_percentage between 0,0.4;1,1
+                - $keyboard_modifiers == []
+              - $keyboard_modifiers == [ ctrl ]
+
+          actions:
+            - on: begin
+              input:
+                - keyboard: [ leftalt+left ]
+
+        # go forward / global
+        - type: swipe
+          fingers: 3
+          direction: right
+
+          # either swipe in the lower half of the touchpad, OR hold down ctrl
+          conditions:
+            - any:
+              - all:
+                - $finger_1_initial_position_percentage between 0,0.4;1,1
+                - $finger_2_initial_position_percentage between 0,0.4;1,1
+                - $finger_3_initial_position_percentage between 0,0.4;1,1
+                - $keyboard_modifiers == []
+              - $keyboard_modifiers == [ ctrl ]
+
+          actions:
+            - on: begin
+              input:
+                - keyboard: [ leftalt+right ]
+
+        # previous tab / global
+        - type: swipe
+          fingers: 3
+          direction: left
+
+          conditions:
+            - $keyboard_modifiers == []
+            - any:
+              - $finger_1_initial_position_percentage between 0,0;1,0.4
+              - $finger_2_initial_position_percentage between 0,0;1,0.4
+              - $finger_3_initial_position_percentage between 0,0;1,0.4
+
+          actions:
+            - on: begin
+              input:
+                - keyboard: [ leftctrl+pageup ]
+
+        # next tab / global
+        - type: swipe
+          fingers: 3
+          direction: right
+
+          conditions:
+            - $keyboard_modifiers == []
+            - any:
+              - $finger_1_initial_position_percentage between 0,0;1,0.4
+              - $finger_2_initial_position_percentage between 0,0;1,0.4
+              - $finger_3_initial_position_percentage between 0,0;1,0.4
+
+          actions:
+            - on: begin
+              input:
+                - keyboard: [ leftctrl+pagedown ]
+
+        # previous track / global
+        - type: hold
+          fingers: 2
+
+          conditions:
+            - $keyboard_modifiers == []
+            - $finger_1_position_percentage between 0.4,0;0.6,0.333
+            - $finger_2_position_percentage_x < 0.2
+
+          actions:
+            - on: begin
+              input:
+                - keyboard: [ previoussong ]
+
+        # next track / global
+        - type: hold
+          fingers: 2
+
+          conditions:
+            - $keyboard_modifiers == []
+            - $finger_1_position_percentage between 0.4,0;0.6,0.333
+            - $finger_2_position_percentage_x > 0.8
+
+          actions:
+            - on: begin
+              input:
+                - keyboard: [ nextsong ]
+
+        # mute / global
+        - type: swipe
+          fingers: 3
+          direction: down
+
+          conditions:
+            - $keyboard_modifiers == []
+            - any:
+              - $finger_1_initial_position_percentage between 0,0;1,0.1
+              - $finger_2_initial_position_percentage between 0,0;1,0.1
+              - $finger_3_initial_position_percentage between 0,0;1,0.1
+
+          actions:
+            - on: begin
+              input:
+                - keyboard: [ mute ]
+
+        # volume up&down / global
+        - type: swipe
+          fingers: 3
+          direction: up_down
+
+          conditions:
+            - $keyboard_modifiers != alt
+
+          actions:
+            - on: update
+              interval: -20
+              input:
+                - keyboard: [ leftshift+volumeup ]
+
+            - on: update
+              interval: 20
+              input:
+                - keyboard: [ leftshift+volumedown ]
+
+        # resize window / global
+        - type: swipe
+          fingers: 3
+          direction: any
+
+          conditions:
+            - $keyboard_modifiers == alt
+
+          actions:
+            - on: begin
+              input:
+                - keyboard: [ +leftmeta ]
+                - mouse: [ +right ]
+
+            - on: update
+              input:
+                - mouse: [ move_by_delta ]
+
+            - on: end_cancel
+              input:
+                - keyboard: [ -leftmeta ]
+                - mouse: [ -right ]
+
+        # minimize window / global
+        - type: pinch
+          fingers: 3
+          direction: in
+
+          conditions:
+            - $keyboard_modifiers == []
+
+          actions:
+            - on: begin
+              plasma_shortcut: kwin,Window Minimize
+
+        # maximize window / global
+        - type: pinch
+          fingers: 3
+          direction: out
+
+          conditions:
+            - $keyboard_modifiers == []
+
+          actions:
+            - on: begin
+              plasma_shortcut: kwin,Window Maximize
+
+        # close window / global
+        - type: hold
+          fingers: 3
+
+          conditions:
+            - all:
+              - $finger_1_position_percentage between 0,0.8;0.2,1
+              - $finger_2_position_percentage_x > $finger_1_position_percentage_x
+              - $finger_3_position_percentage_x > $finger_2_position_percentage_x
+
+          actions:
+            - on: begin
+              plasma_shortcut: kwin,Window Close
+
+        # close tab / global
+        - type: hold
+          fingers: 3
+
+          conditions:
+            - all:
+              - $finger_1_position_percentage between 0,0;1,0.333
+              - $finger_2_position_percentage_y > $finger_1_position_percentage_y
+              - $finger_3_position_percentage_y > $finger_2_position_percentage_y
+
+          actions:
+            - on: begin
+              input:
+                - keyboard: [ leftctrl+W ]
+
+        # desktop overview / global
+        - type: hold
+          fingers: 3
+
+          conditions:
+            - $keyboard_modifiers == []
+
+          actions:
+            - on: begin
+              plasma_shortcut: kwin,Overview
+
+        # grid overview / global
+        - type: hold
+          fingers: 4
+
+          conditions:
+            - $keyboard_modifiers == []
+
+          actions:
+            - on: begin
+              plasma_shortcut: kwin,Grid View
+
+        # cube overview / global
+        - type: hold
+          fingers: 4
+
+          conditions:
+            - $keyboard_modifiers == ctrl
+
+          actions:
+            - on: begin
+              plasma_shortcut: kwin,Cube
+
+        # up virtual desktop / global
+        - type: swipe
+          fingers: 4
+          direction: up
+
+          conditions:
+            - $keyboard_modifiers == []
+
+          actions:
+            - on: begin
+              plasma_shortcut: kwin,Switch One Desktop Up
+
+        # down virtual desktop / global
+        - type: swipe
+          fingers: 4
+          direction: down
+
+          conditions:
+            - $keyboard_modifiers == []
+
+          actions:
+            - on: begin
+              plasma_shortcut: kwin,Switch One Desktop Down
+
+        # left virtual desktop / global
+        - type: swipe
+          fingers: 4
+          direction: left
+
+          conditions:
+            - $keyboard_modifiers == []
+
+          actions:
+            - on: begin
+              plasma_shortcut: kwin,Switch One Desktop to the Left
+
+        # right virtual desktop / global
+        - type: swipe
+          fingers: 4
+          direction: right
+
+          conditions:
+            - $keyboard_modifiers == []
+
+          actions:
+            - on: begin
+              plasma_shortcut: kwin,Switch One Desktop to the Right
+
+        # up virtual desktop shift window / global
+        - type: swipe
+          fingers: 4
+          direction: up
+
+          conditions:
+            - $keyboard_modifiers == shift
+
+          actions:
+            - on: begin
+              plasma_shortcut: kwin,Window One Desktop Up
+
+        # down virtual desktop window shift window / global
+        - type: swipe
+          fingers: 4
+          direction: down
+
+          conditions:
+            - $keyboard_modifiers == shift
+
+          actions:
+            - on: begin
+              plasma_shortcut: kwin,Window One Desktop Down
+
+        # left virtual desktop shift window / global
+        - type: swipe
+          fingers: 4
+          direction: left
+
+          conditions:
+            - $keyboard_modifiers == shift
+
+          actions:
+            - on: begin
+              plasma_shortcut: kwin,Window One Desktop to the Left
+
+        # right virtual desktop shift window / global
+        - type: swipe
+          fingers: 4
+          direction: right
+
+          conditions:
+            - $keyboard_modifiers == shift
+
+          actions:
+            - on: begin
+              plasma_shortcut: kwin,Window One Desktop to the Right
+
+        # up virtual desktop shift window x2 / global
+        - type: swipe
+          fingers: 2
+          direction: up
+
+          conditions:
+            - any:
+              - all:
+                - $finger_1_initial_position_percentage between 0,0;0.3,1
+                - $finger_2_initial_position_percentage between 0.7,0;1,1
+              - all:
+                - $finger_2_initial_position_percentage between 0,0;0.3,1
+                - $finger_1_initial_position_percentage between 0.7,0;1,1
+
+          actions:
+            - on: begin
+              plasma_shortcut: kwin,Window One Desktop Up
+
+        # down virtual desktop shift window x2 / global
+        - type: swipe
+          fingers: 2
+          direction: down
+
+          conditions:
+            - any:
+              - all:
+                - $finger_1_initial_position_percentage between 0,0;0.3,1
+                - $finger_2_initial_position_percentage between 0.7,0;1,1
+              - all:
+                - $finger_2_initial_position_percentage between 0,0;0.3,1
+                - $finger_1_initial_position_percentage between 0.7,0;1,1
+
+          actions:
+            - on: begin
+              plasma_shortcut: kwin,Window One Desktop Down
+
+        # left virtual desktop shift window x2 / global
+        - type: swipe
+          fingers: 2
+          direction: left
+
+          conditions:
+            - any:
+              - all:
+                - $finger_1_initial_position_percentage between 0,0;1,0.3
+                - $finger_2_initial_position_percentage between 0,0.7;1,1
+              - all:
+                - $finger_2_initial_position_percentage between 0,0;1,0.3
+                - $finger_1_initial_position_percentage between 0,0.7;1,1
+
+          actions:
+            - on: begin
+              plasma_shortcut: kwin,Window One Desktop to the Left
+
+        # right virtual desktop shift window x2 / global
+        - type: swipe
+          fingers: 2
+          direction: right
+
+          conditions:
+            - any:
+              - all:
+                - $finger_1_initial_position_percentage between 0,0;1,0.3
+                - $finger_2_initial_position_percentage between 0,0.7;1,1
+              - all:
+                - $finger_2_initial_position_percentage between 0,0;1,0.3
+                - $finger_1_initial_position_percentage between 0,0.7;1,1
+
+          actions:
+            - on: begin
+              plasma_shortcut: kwin,Window One Desktop to the Right

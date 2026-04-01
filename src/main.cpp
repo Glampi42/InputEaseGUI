@@ -11,6 +11,7 @@
 
 #include "custom/devicestreemodel.h"
 #include "custom/devicesproxymodel.h"
+#include "yaml_stuff/configmanager.h"
 
 int main(int argc, char *argv[])
 {
@@ -30,6 +31,9 @@ int main(int argc, char *argv[])
     //-----------------General settings-----------------UP
 
     QQmlApplicationEngine engine;
+
+    ConfigManager config;
+    engine.rootContext()->setContextProperty(QStringLiteral("config"), &config);
 
     //-----------------Setting up devices menu-----------------DOWN
     auto* source_model = new DevicesTreeModel;
@@ -62,6 +66,9 @@ int main(int argc, char *argv[])
     if (engine.rootObjects().isEmpty()) {
         return -1;
     }
+
+    // things to run after the QML component tree is instantiated:
+    config.load();
 
     return app.exec();
 }

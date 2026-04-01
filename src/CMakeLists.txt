@@ -30,12 +30,14 @@ target_link_libraries(inputeasegui_start
     KF6::ConfigCore
     KF6::ConfigGui
     KF6::ItemModels
+    yaml-cpp
     inputeasegui_helpers
 )
 
 add_subdirectory(helpers)
 add_subdirectory(custom)
+add_subdirectory(yaml_stuff)
 
-target_compile_options(inputeasegui_start PRIVATE -Wno-missing-include-dirs)
+target_compile_options(inputeasegui_start PRIVATE -Wno-missing-include-dirs -fexceptions)
 
 install(TARGETS inputeasegui_start ${KDE_INSTALL_TARGETS_DEFAULT_ARGS})

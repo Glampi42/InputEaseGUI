@@ -36,6 +36,8 @@ find_package(KF6 REQUIRED COMPONENTS
     ItemModels
 )
 
+find_package(yaml-cpp REQUIRED)
+
 ecm_find_qmlmodule(org.kde.kirigami REQUIRED)
 ecm_find_qmlmodule(org.kde.kirigamiaddons.treeview REQUIRED)
 

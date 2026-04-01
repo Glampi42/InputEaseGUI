@@ -35,17 +35,80 @@ Kirigami.ApplicationWindow {
       property int text_alignment_reverse: Qt.application.layoutDirection === Qt.LeftToRight ? Qt.RightToLeft : Qt.LeftToRight
 
       // Qt.AlignLeft for English, Qt.AlignRight for Arabic
-      property int layout_alignment: Qt.application.layoutDirection === Qt.LeftToRight ? Qt.AlignLeft : Qt.AlignRight
-      property int layout_alignment_reverse: Qt.application.layoutDirection === Qt.LeftToRight ? Qt.AlignRight : Qt.AlignLeft
+      property int layout_alignment: !LayoutMirroring.enabled ? Qt.AlignLeft : Qt.AlignRight
+      property int layout_alignment_reverse: !LayoutMirroring.enabled ? Qt.AlignRight : Qt.AlignLeft
       //-------------General properties-------------UP
 
       //-------------DevicesPage properties-------------DOWN
       property int deviceInset: Kirigami.Units.smallSpacing
       property int devicePadding: deviceInset + Kirigami.Units.smallSpacing
-      property int gestureInset: Kirigami.Units.smallSpacing*3 + Kirigami.Units.iconSizes.small + Kirigami.Units.smallSpacing
+      property int gestureInset: Kirigami.Units.smallSpacing * 3 + Kirigami.Units.iconSizes.small + Kirigami.Units.smallSpacing
       property int gesturePadding: gestureInset + Kirigami.Units.smallSpacing
       //-------------DevicesPage properties-------------UP
+
       padding: 0
+
+      //-------------------Error pop-ups-------------------DOWN
+      // FATAL — dismiss exits the app, no background dismiss
+      Kirigami.PromptDialog {
+          id: fatalErrorDialog
+          title: i18nc("@title:window", "Critical Error")
+          property string message: ""
+          subtitle: message
+          standardButtons: Kirigami.Dialog.Close
+          closePolicy: QQC.Popup.NoAutoClose
+
+          onRejected: Qt.quit()
+      }
+
+      // NON-FATAL — dismiss keeps app open, no background dismiss
+      Kirigami.PromptDialog {
+          id: errorDialog
+          title: i18nc("@title:window", "Error")
+          property string message: ""
+          subtitle: message
+          standardButtons: Kirigami.Dialog.Close
+          closePolicy: QQC.Popup.NoAutoClose
+
+          onRejected: errorDialog.close()
+      }
+
+      // CORRUPT CONFIG — reset or exit the app, no background dismiss
+      Kirigami.PromptDialog {
+          id: corruptConfigDialog
+          title: i18nc("@title:window", "Config File Corrupted")
+          property string message: ""
+          subtitle: message
+          standardButtons: Kirigami.Dialog.Yes | Kirigami.Dialog.No
+          closePolicy: QQC.Popup.NoAutoClose
+
+          onAccepted: {
+             config.clear()
+             corruptConfigDialog.close()
+          }
+          onRejected: Qt.quit()
+      }
+
+      Connections {
+          target: config
+          function onFatalError(message) {
+              fatalErrorDialog.message = message
+              fatalErrorDialog.open()
+          }
+          function onError(message) {
+              errorDialog.message = message
+              errorDialog.open()
+          }
+          function onConfigCorrupted(message) {
+              corruptConfigDialog.message = message
+              corruptConfigDialog.open()
+          }
+          // function onAppNotFound() {
+          //     fatalErrorDialog.message = "InputActions is not installed or could not be found."
+          //     fatalErrorDialog.open()
+          // }
+      }
+      //-------------------Error pop-ups-------------------UP
 
       QQC.SplitView {
          id: split
