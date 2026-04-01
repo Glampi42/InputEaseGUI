@@ -53,8 +53,11 @@ Kirigami.ApplicationWindow {
       Kirigami.PromptDialog {
          id: fatalErrorDialog
          title: i18nc("@title:window", "Critical Error")
+         dialogType: Kirigami.PromptDialog.Error
+
          property string message: ""
          subtitle: message
+
          standardButtons: Kirigami.Dialog.Close
          closePolicy: QQC.Popup.NoAutoClose
 
@@ -65,8 +68,11 @@ Kirigami.ApplicationWindow {
       Kirigami.PromptDialog {
          id: errorDialog
          title: i18nc("@title:window", "Error")
+         dialogType: Kirigami.PromptDialog.Error
+
          property string message: ""
          subtitle: message
+
          standardButtons: Kirigami.Dialog.Close
          closePolicy: QQC.Popup.NoAutoClose
 
@@ -77,8 +83,11 @@ Kirigami.ApplicationWindow {
       Kirigami.PromptDialog {
          id: corruptConfigDialog
          title: i18nc("@title:window", "Config File Corrupted")
+         dialogType: Kirigami.PromptDialog.Warning
+
          property string message: ""
          subtitle: message
+
          standardButtons: Kirigami.Dialog.Yes | Kirigami.Dialog.No
          closePolicy: QQC.Popup.NoAutoClose
 
