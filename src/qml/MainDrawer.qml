@@ -55,13 +55,10 @@ Kirigami.Page {
 
          section {
             property: "section"
-            delegate: Kirigami.ListSectionHeader {
-
-               required property string section
-
+            delegate: CollapsibleListSectionHeader {
                width: ListView.view.width
+
                text: root.collapsed ? "" : section
-               // TODO: show separator line when root.collapsed
             }
          }
 
@@ -102,7 +99,7 @@ Kirigami.Page {
 
       property int targetWidth: root.collapsed ? minWidth : maxWidth
       readonly property int maxWidth: Kirigami.Units.gridUnit * 13
-      readonly property int collapseWidth: Kirigami.Units.gridUnit * 6// the sidebar is considered collapsed below this width
+      readonly property int collapseWidth: Kirigami.Units.gridUnit * 5// the sidebar will collapse when it goes below this width
       readonly property int minWidth: Kirigami.Units.smallSpacing * 2 + Kirigami.Units.iconSizes.medium + Kirigami.Units.smallSpacing * 2
    }
 }
