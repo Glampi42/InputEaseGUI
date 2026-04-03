@@ -14,8 +14,19 @@ ConfigManager::ConfigManager(QObject* parent) : QObject(parent)
 
 bool ConfigManager::load()
 {
-    QFile file(m_configPath);
+    // ensure the config dir exists
+    QFileInfo fileInfo(m_configPath);
+    QDir dir = fileInfo.absoluteDir();
+    if (!dir.exists()) {
+        if (!dir.mkpath(dir.absolutePath())) {
+            qWarning() << "Failed to create config directories at" << dir.absolutePath();
+            Q_EMIT fatalError(i18nc("@info error message", "Failed to create the config directory at\n%1\nIs the write permission missing?", dir.absolutePath()));
+            return false;
+        }
+    }
 
+    // ensure the config file exists
+    QFile file(m_configPath);
     if (!file.exists()) {
         // create file if it doesn't exist:
         if (!file.open(QIODevice::WriteOnly)) {
