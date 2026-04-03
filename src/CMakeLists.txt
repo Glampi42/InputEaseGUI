@@ -13,8 +13,9 @@ target_sources(inputeasegui_start
 ecm_target_qml_sources(inputeasegui_start
     SOURCES
     Main.qml
-    qml/DevicesPage.qml
     qml/MainToolbar.qml
+    qml/MainDrawer.qml
+    qml/MainDrawerModel.qml
 )
 
 target_link_libraries(inputeasegui_start

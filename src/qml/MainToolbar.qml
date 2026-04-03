@@ -5,6 +5,7 @@ import org.kde.kirigami as Kirigami
 
 import me.glampi.inputeasegui.helpers
 
+// The main toolbar shown at the top at all times
 Rectangle {
    Kirigami.Theme.colorSet: Kirigami.Theme.Header
    Kirigami.Theme.inherit: false
@@ -25,7 +26,7 @@ Rectangle {
       Kirigami.ActionToolBar {
          id: main_toolbar_left
 
-         alignment: main_page.layout_alignment
+         alignment: root.layout_alignment
          Layout.fillWidth: false
          Layout.minimumWidth: visibleWidth
 
@@ -77,7 +78,7 @@ Rectangle {
       Kirigami.ActionToolBar {
          id: main_toolbar_right
 
-         alignment: main_page.layout_alignment_reverse
+         alignment: root.layout_alignment_reverse
          Layout.fillWidth: false
          Layout.minimumWidth: visibleWidth
 
