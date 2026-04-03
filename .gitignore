@@ -1,0 +1,102 @@
+# Test config files
+config/
+
+# Build directories
+build/
+build-*/
+cmake-build-*/
+out/
+
+# CMake
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+compile_commands.json
+CTestTestfile.cmake
+_deps/
+
+# Ninja
+.ninja_deps
+.ninja_log
+
+# Qt Creator
+.qtcreator/
+*.pro.user*
+*.qbs.user*
+*.creator*
+*.autosave
+*.config
+
+# Qt / QML cache
+*.qmlc
+*.jsc
+*.qmltypes
+qmldir
+.qmake.stash
+
+# Translation files (generated)
+*.qm
+
+# Resource files (generated)
+qrc_*.cpp
+
+# MOC / UIC / RCC
+moc_*.cpp
+moc_*.h
+ui_*.h
+qrc_*.cpp
+
+# Object files
+*.o
+*.obj
+*.lo
+
+# Libraries
+*.a
+*.la
+*.lib
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Debug symbols
+*.dSYM/
+*.pdb
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+
+# Test/coverage
+coverage/
+*.gcno
+*.gcda
+*.gcov
+
+# Packaging
+*.apk
+*.ipa
+*.deb
+*.rpm
+
+# Temporary
+*~
+*.swp
+*.tmp
+
+# Environment
+.env
+.env.*
