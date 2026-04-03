@@ -8,40 +8,91 @@ import org.kde.kirigamiaddons.delegates
 Kirigami.Page {
    id: root
 
+   //--------------------Collapsing/expanding functionality--------------------DOWN
    property bool collapsed: false
+   property bool animateWidth: true// whether the sidebar width change should be animated or not; should be true initially
+
+   function toggleSidebar() {
+      if (collapsed) {
+         Kirigami.ColumnView.preferredWidth = _private.maxWidth;
+
+         collapsed = false;
+      } else {
+         Kirigami.ColumnView.preferredWidth = _private.minWidth;
+
+         collapsed = true;
+      }
+   }
 
    Kirigami.ColumnView.interactiveResizeEnabled: true
    Kirigami.ColumnView.minimumWidth: _private.minWidth
    Kirigami.ColumnView.maximumWidth: _private.maxWidth
    Kirigami.ColumnView.onInteractiveResizingChanged: {
+      animateWidth = !Kirigami.ColumnView.interactiveResizing
+
       if (!Kirigami.ColumnView.interactiveResizing && collapsed) {
          Kirigami.ColumnView.preferredWidth = root.Kirigami.ColumnView.minimumWidth;
       }
    }
    Kirigami.ColumnView.preferredWidth: _private.targetWidth
    Kirigami.ColumnView.onPreferredWidthChanged: {
+      if (!Kirigami.ColumnView.interactiveResizing)
+         return;// ignore all resizing done with the resize button/automatically
+
       if (width > _private.collapseWidth) {
          collapsed = false;
-      } else if (Kirigami.ColumnView.interactiveResizing) {
+      } else {
          collapsed = true;
       }
    }
 
+   Behavior on Kirigami.ColumnView.preferredWidth {
+      enabled: animateWidth
+
+      NumberAnimation {
+         duration: Kirigami.Units.longDuration
+         easing.type: Easing.InOutQuad
+      }
+   }
+   //--------------------Collapsing/expanding functionality--------------------UP
+
    Kirigami.Theme.colorSet: Kirigami.Theme.View
    Kirigami.Theme.inherit: false
-
-   Kirigami.ColumnView.fillWidth: false
-   implicitWidth: collapsed ? 48 : 240
 
    padding: 0
 
    // the header with a search field
    header: QQC.ToolBar {
-      Kirigami.SearchField {
-         // visible: !root.collapsed
+      padding: Kirigami.Units.smallSpacing
+
+      RowLayout {
          anchors.fill: parent
 
-         // TODO make it functional
+         spacing: Kirigami.Units.smallSpacing
+
+         QQC.Button {
+            // this size matches that of the icons in the ListView below
+            implicitHeight: Kirigami.Units.iconSizes.medium + Kirigami.Units.smallSpacing*2
+            implicitWidth:  Kirigami.Units.iconSizes.medium + Kirigami.Units.smallSpacing*2
+
+            icon.name: root.collapsed ? "sidebar-expand-left" : "sidebar-collapse-left"
+            icon.height: Kirigami.Units.iconSizes.smallMedium
+            icon.width: Kirigami.Units.iconSizes.smallMedium
+
+            QQC.ToolTip.visible: hovered
+            QQC.ToolTip.text: root.collapsed ? i18nc("@info:tooltip", "Open sidebar") : i18nc("@info:tooltip", "Close sidebar")
+            QQC.ToolTip.delay: Kirigami.Units.toolTipDelay
+
+            onClicked: toggleSidebar()
+         }
+
+         Kirigami.SearchField {
+            visible: !root.collapsed
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+
+            // TODO make it functional
+         }
       }
    }
 
@@ -70,6 +121,8 @@ Kirigami.Page {
             topPadding: Kirigami.Units.smallSpacing
             bottomInset: 0
             bottomPadding: Kirigami.Units.smallSpacing
+            leftInset: Kirigami.Units.smallSpacing
+            rightInset: Kirigami.Units.smallSpacing
 
             // height: Kirigami.Units.smallSpacing + Kirigami.Units.iconSizes.medium + Kirigami.Units.smallSpacing
             width: ListView.view?.width ?? 0
