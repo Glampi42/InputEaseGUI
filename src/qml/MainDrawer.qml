@@ -28,7 +28,7 @@ Kirigami.Page {
    Kirigami.ColumnView.minimumWidth: _private.minWidth
    Kirigami.ColumnView.maximumWidth: _private.maxWidth
    Kirigami.ColumnView.onInteractiveResizingChanged: {
-      animateWidth = !Kirigami.ColumnView.interactiveResizing
+      animateWidth = !Kirigami.ColumnView.interactiveResizing;
 
       if (!Kirigami.ColumnView.interactiveResizing && collapsed) {
          Kirigami.ColumnView.preferredWidth = root.Kirigami.ColumnView.minimumWidth;
@@ -61,7 +61,7 @@ Kirigami.Page {
 
    padding: 0
 
-   // the header with a search field
+   // the header with a collapse button and a global search field
    header: QQC.ToolBar {
       padding: Kirigami.Units.smallSpacing
 
@@ -72,8 +72,10 @@ Kirigami.Page {
 
          QQC.Button {
             // this size matches that of the icons in the ListView below
-            implicitHeight: Kirigami.Units.iconSizes.medium + Kirigami.Units.smallSpacing*2
-            implicitWidth:  Kirigami.Units.iconSizes.medium + Kirigami.Units.smallSpacing*2
+            implicitHeight: Kirigami.Units.iconSizes.medium + Kirigami.Units.smallSpacing * 2
+            implicitWidth: Kirigami.Units.iconSizes.medium + Kirigami.Units.smallSpacing * 2
+
+            flat: true
 
             icon.name: root.collapsed ? "sidebar-expand-left" : "sidebar-collapse-left"
             icon.height: Kirigami.Units.iconSizes.smallMedium
@@ -89,7 +91,7 @@ Kirigami.Page {
          Kirigami.SearchField {
             visible: !root.collapsed
             Layout.fillWidth: true
-            Layout.fillHeight: true
+            // Layout.fillHeight: true
 
             // TODO make it functional
          }
@@ -142,6 +144,12 @@ Kirigami.Page {
 
                   text: name
                }
+            }
+
+            QQC.ToolTip {
+               visible: hovered && root.collapsed
+               text: name
+               delay: Kirigami.Units.toolTipDelay
             }
          }
       }
