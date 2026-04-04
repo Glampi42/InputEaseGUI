@@ -71,6 +71,8 @@ Kirigami.Page {
          spacing: Kirigami.Units.smallSpacing
 
          QQC.Button {
+            id: collapseButton
+
             // this size matches that of the icons in the ListView below
             implicitHeight: Kirigami.Units.iconSizes.medium + Kirigami.Units.smallSpacing * 2
             implicitWidth: Kirigami.Units.iconSizes.medium + Kirigami.Units.smallSpacing * 2
@@ -86,12 +88,20 @@ Kirigami.Page {
             QQC.ToolTip.delay: Kirigami.Units.toolTipDelay
 
             onClicked: toggleSidebar()
+            Keys.onReturnPressed: toggleSidebar()
          }
 
          Kirigami.SearchField {
+            id: searchbar
+
             visible: !root.collapsed
             Layout.fillWidth: true
             // Layout.fillHeight: true
+
+            Keys.onDownPressed: {
+               listView.forceActiveFocus();
+               listView.currentIndex = 0;
+            }
 
             // TODO make it functional
          }
@@ -100,14 +110,38 @@ Kirigami.Page {
 
    contentItem: QQC.ScrollView {
       ListView {
+         id: listView
+
+         //---------------------Keyboard navigation---------------------DOWN
+         activeFocusOnTab: true
+
+         Keys.onReturnPressed: selectCurrentItem()
+         Keys.onEnterPressed: selectCurrentItem()
+
+         Keys.onUpPressed: {
+            if (currentIndex === 0 && searchbar.visible)
+               searchbar.forceActiveFocus();
+            else
+               decrementCurrentIndex();
+         }
+
+         function selectCurrentItem() {
+            const d = currentItem;
+            if (!d)
+               return;
+
+            mainDrawerModel.selectedItem = d.index;
+         }
+         //---------------------Keyboard navigation---------------------UP
+
          topMargin: Kirigami.Units.smallSpacing
          bottomMargin: Kirigami.Units.largeSpacing
          spacing: Kirigami.Units.smallSpacing
 
-         model: MainDrawerModel {}
+         model: mainDrawerModel
 
          section {
-            property: "section"
+            property: "sectionRole"
             delegate: CollapsibleListSectionHeader {
                width: ListView.view.width
 
@@ -116,8 +150,9 @@ Kirigami.Page {
          }
 
          delegate: QQC.ItemDelegate {
-            required property string name
-            required property string iconName
+            required property int index
+            required property string nameRole
+            required property string iconNameRole
 
             topInset: 0
             topPadding: Kirigami.Units.smallSpacing
@@ -126,12 +161,14 @@ Kirigami.Page {
             leftInset: Kirigami.Units.smallSpacing
             rightInset: Kirigami.Units.smallSpacing
 
+            highlighted: mainDrawerModel.selectedItem === index
+
             // height: Kirigami.Units.smallSpacing + Kirigami.Units.iconSizes.medium + Kirigami.Units.smallSpacing
             width: ListView.view?.width ?? 0
 
             contentItem: RowLayout {
                Kirigami.Icon {
-                  source: iconName
+                  source: iconNameRole
                   implicitWidth: Kirigami.Units.iconSizes.medium
                   implicitHeight: Kirigami.Units.iconSizes.medium
                }
@@ -142,14 +179,20 @@ Kirigami.Page {
 
                   elide: LayoutMirroring.enabled ? Text.ElideLeft : Text.ElideRight
 
-                  text: name
+                  text: nameRole
                }
             }
 
             QQC.ToolTip {
                visible: hovered && root.collapsed
-               text: name
+               text: nameRole
                delay: Kirigami.Units.toolTipDelay
+            }
+
+            onClicked: {
+               mainDrawerModel.selectedItem = index;
+               listView.currentIndex = index;
+               listView.forceActiveFocus();
             }
          }
       }

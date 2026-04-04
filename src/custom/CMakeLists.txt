@@ -6,4 +6,6 @@ target_sources(inputeasegui_start
    iedevice.cpp
    devicestreemodel.h
    devicestreemodel.cpp
+   maindrawermodel.h
+   maindrawermodel.cpp
 )
