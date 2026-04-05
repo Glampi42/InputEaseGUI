@@ -13,18 +13,18 @@ Kirigami.OverlayDrawer {
    handleVisible: false// hide the default collapse/expand floating button
 
    //--------------------Collapsing/expanding functionality--------------------DOWN
-   property bool collapsed: false
+   property bool sidebarCollapsed: false
    property bool animateWidth: true// whether the sidebar width change should be animated or not; should be true initially
 
    function toggleSidebar() {
-      if (collapsed) {
+      if (sidebarCollapsed) {
          preferredSize = _private.maxWidth;
 
-         collapsed = false;
+         sidebarCollapsed = false;
       } else {
          preferredSize = _private.minWidth;
 
-         collapsed = true;
+         sidebarCollapsed = true;
       }
    }
 
@@ -34,7 +34,7 @@ Kirigami.OverlayDrawer {
    onInteractiveResizingChanged: {
       animateWidth = !interactiveResizing;
 
-      if (!interactiveResizing && collapsed) {
+      if (!interactiveResizing && sidebarCollapsed) {
          preferredSize = _private.minWidth;
       }
    }
@@ -44,9 +44,9 @@ Kirigami.OverlayDrawer {
          return;// ignore all resizing done with the resize button/automatically
 
       if (width > _private.collapseWidth) {
-         collapsed = false;
+         sidebarCollapsed = false;
       } else {
-         collapsed = true;
+         sidebarCollapsed = true;
       }
    }
 
@@ -81,17 +81,17 @@ Kirigami.OverlayDrawer {
                id: collapseButton
 
                // this size matches that of the icons in the ListView below
-               implicitHeight: Kirigami.Units.iconSizes.medium + Kirigami.Units.smallSpacing * 2
-               implicitWidth: Kirigami.Units.iconSizes.medium + Kirigami.Units.smallSpacing * 2
+               implicitHeight: Kirigami.Units.iconSizes.smallMedium + Kirigami.Units.smallSpacing * 2
+               implicitWidth: sidebarCollapsed ? Kirigami.Units.iconSizes.medium + Kirigami.Units.smallSpacing * 2 : implicitHeight
 
                flat: true
 
-               icon.name: root.collapsed ? "sidebar-expand-left" : "sidebar-collapse-left"
+               icon.name: root.sidebarCollapsed ? "sidebar-expand-left" : "sidebar-collapse-left"
                icon.height: Kirigami.Units.iconSizes.smallMedium
                icon.width: Kirigami.Units.iconSizes.smallMedium
 
                QQC.ToolTip.visible: hovered
-               QQC.ToolTip.text: root.collapsed ? i18nc("@info:tooltip", "Open sidebar") : i18nc("@info:tooltip", "Close sidebar")
+               QQC.ToolTip.text: root.sidebarCollapsed ? i18nc("@info:tooltip", "Open sidebar") : i18nc("@info:tooltip", "Close sidebar")
                QQC.ToolTip.delay: Kirigami.Units.toolTipDelay
 
                onClicked: toggleSidebar()
@@ -101,7 +101,7 @@ Kirigami.OverlayDrawer {
             Kirigami.SearchField {
                id: searchbar
 
-               visible: !root.collapsed
+               visible: !root.sidebarCollapsed
                Layout.fillWidth: true
                // Layout.fillHeight: true
 
@@ -155,7 +155,7 @@ Kirigami.OverlayDrawer {
                delegate: CollapsibleListSectionHeader {
                   width: ListView.view.width
 
-                  text: root.collapsed ? "" : section
+                  text: root.sidebarCollapsed ? "" : section
                }
             }
 
@@ -173,18 +173,18 @@ Kirigami.OverlayDrawer {
 
                highlighted: mainDrawerModel.selectedItem === index
 
-               // height: Kirigami.Units.smallSpacing + Kirigami.Units.iconSizes.medium + Kirigami.Units.smallSpacing
+               // height: Kirigami.Units.smallSpacing + Kirigami.Units.iconSizes.smallMedium + Kirigami.Units.smallSpacing
                width: ListView.view?.width ?? 0
 
                contentItem: RowLayout {
                   Kirigami.Icon {
                      source: iconNameRole
-                     implicitWidth: Kirigami.Units.iconSizes.medium
-                     implicitHeight: Kirigami.Units.iconSizes.medium
+                     implicitWidth:  sidebarCollapsed ? Kirigami.Units.iconSizes.medium : Kirigami.Units.iconSizes.smallMedium
+                     implicitHeight: sidebarCollapsed ? Kirigami.Units.iconSizes.medium : Kirigami.Units.iconSizes.smallMedium
                   }
 
                   QQC.Label {
-                     visible: !root.collapsed
+                     visible: !root.sidebarCollapsed
                      Layout.fillWidth: true
 
                      elide: LayoutMirroring.enabled ? Text.ElideLeft : Text.ElideRight
@@ -194,7 +194,7 @@ Kirigami.OverlayDrawer {
                }
 
                QQC.ToolTip {
-                  visible: hovered && root.collapsed
+                  visible: hovered && root.sidebarCollapsed
                   text: nameRole
                   delay: Kirigami.Units.toolTipDelay
                }
@@ -212,7 +212,7 @@ Kirigami.OverlayDrawer {
    QtObject {
       id: _private
 
-      property int targetWidth: root.collapsed ? minWidth : maxWidth
+      property int targetWidth: root.sidebarCollapsed ? minWidth : maxWidth
       readonly property int maxWidth: Kirigami.Units.gridUnit * 13
       readonly property int collapseWidth: Kirigami.Units.gridUnit * 5// the sidebar will collapse when it goes below this width
       readonly property int minWidth: Kirigami.Units.smallSpacing * 2 + Kirigami.Units.iconSizes.medium + Kirigami.Units.smallSpacing * 2
