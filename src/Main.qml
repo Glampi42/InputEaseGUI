@@ -132,23 +132,73 @@ Kirigami.ApplicationWindow {
    pageStack.columnView.columnResizeMode: Kirigami.ColumnView.DynamicColumns
 
    // the main toolbar with buttons that adjust their function based on the selected item
-   header: MainToolbar {}
+   // header: MainToolbar {}
+
+   pageStack.leftSidebar: MainDrawer {}
 
    Component.onCompleted: {
       pageStack.globalToolBar.style = Kirigami.ApplicationHeaderStyle.None;
 
-      pageStack.push(Qt.resolvedUrl("MainDrawer.qml"));
-      pageStack.push(pageOne);
+      pageStack.push(generalSettingsPage);// general settings open initially
    }
 
-   Component {
-           id: pageOne
-           Kirigami.Page {
-               title: "Page One"
+   //-----------------Pushing/popping Kirigami.Pages-----------------DOWN
+   Kirigami.PagePool {
+      id: pagePool
+   }
 
-               QQC.Button {
-                  text: "Button"
-               }
-           }
-       }
+   readonly property var subDrawerPage: pagePool.loadPage(Qt.resolvedUrl("SubDrawer.qml"))
+   readonly property var generalSettingsPage: pagePool.loadPage(Qt.resolvedUrl("GeneralSettingsPage.qml"))
+   readonly property var deviceRulesPage: pagePool.loadPage(Qt.resolvedUrl("DeviceRulesPage.qml"))
+   readonly property var triggerSettingsPage: pagePool.loadPage(Qt.resolvedUrl("TriggerSettingsPage.qml"))
+
+   Connections {
+      target: mainDrawerModel
+
+      function onSelectedItemChanged() {
+         switch (mainDrawerModel.selectedItem) {
+         case 0:// General Settings
+            pageStack.removePage(subDrawerPage);
+            pageStack.removePage(deviceRulesPage);
+            pageStack.removePage(triggerSettingsPage);
+
+            if(!containsPage(generalSettingsPage))
+               pageStack.push(generalSettingsPage);
+            break;
+         case 1:// Device Rules
+            pageStack.removePage(generalSettingsPage);
+            pageStack.removePage(triggerSettingsPage);
+
+            if(!containsPage(subDrawerPage))
+               pageStack.push(subDrawerPage);
+            if(!containsPage(deviceRulesPage))
+               pageStack.push(deviceRulesPage);
+            break;
+         default:
+            // A specific device
+            if (mainDrawerModel.selectedItem < 0)
+               break;// just in case
+
+            pageStack.removePage(generalSettingsPage);
+            pageStack.removePage(deviceRulesPage);
+
+            if(!containsPage(subDrawerPage))
+               pageStack.push(subDrawerPage);
+            if(!containsPage(triggerSettingsPage))
+               pageStack.push(triggerSettingsPage);
+            break;
+         }
+      }
+   }
+
+   function containsPage(page) {
+      for (let i = 0; i < pageStack.depth; i++) {
+         if (pageStack.get(i) === page) {
+            return true;
+         }
+      }
+
+      return false;
+   }
+   //-----------------Pushing/popping Kirigami.Pages-----------------UP
 }

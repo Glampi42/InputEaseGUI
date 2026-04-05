@@ -5,8 +5,12 @@ import org.kde.kirigami as Kirigami
 import org.kde.kirigamiaddons.delegates
 
 // The leftmost collapsible sidebar where the General Settings, Device Rules and all Devices are displayed
-Kirigami.Page {
+Kirigami.OverlayDrawer {
    id: root
+
+   modal: false// display on the same layer with the rest of the pages, not on top
+   drawerOpen: true
+   handleVisible: false// hide the default collapse/expand floating button
 
    //--------------------Collapsing/expanding functionality--------------------DOWN
    property bool collapsed: false
@@ -14,29 +18,29 @@ Kirigami.Page {
 
    function toggleSidebar() {
       if (collapsed) {
-         Kirigami.ColumnView.preferredWidth = _private.maxWidth;
+         preferredSize = _private.maxWidth;
 
          collapsed = false;
       } else {
-         Kirigami.ColumnView.preferredWidth = _private.minWidth;
+         preferredSize = _private.minWidth;
 
          collapsed = true;
       }
    }
 
-   Kirigami.ColumnView.interactiveResizeEnabled: true
-   Kirigami.ColumnView.minimumWidth: _private.minWidth
-   Kirigami.ColumnView.maximumWidth: _private.maxWidth
-   Kirigami.ColumnView.onInteractiveResizingChanged: {
-      animateWidth = !Kirigami.ColumnView.interactiveResizing;
+   interactiveResizeEnabled: true
+   minimumSize: _private.minWidth
+   maximumSize: _private.maxWidth
+   onInteractiveResizingChanged: {
+      animateWidth = !interactiveResizing;
 
-      if (!Kirigami.ColumnView.interactiveResizing && collapsed) {
-         Kirigami.ColumnView.preferredWidth = root.Kirigami.ColumnView.minimumWidth;
+      if (!interactiveResizing && collapsed) {
+         preferredSize = _private.minWidth;
       }
    }
-   Kirigami.ColumnView.preferredWidth: _private.targetWidth
-   Kirigami.ColumnView.onPreferredWidthChanged: {
-      if (!Kirigami.ColumnView.interactiveResizing)
+   preferredSize: _private.targetWidth
+   onPreferredSizeChanged: {
+      if (!interactiveResizing)
          return;// ignore all resizing done with the resize button/automatically
 
       if (width > _private.collapseWidth) {
@@ -46,7 +50,7 @@ Kirigami.Page {
       }
    }
 
-   Behavior on Kirigami.ColumnView.preferredWidth {
+   Behavior on preferredSize {
       enabled: animateWidth
 
       NumberAnimation {
@@ -61,138 +65,145 @@ Kirigami.Page {
 
    padding: 0
 
-   // the header with a collapse button and a global search field
-   header: QQC.ToolBar {
-      padding: Kirigami.Units.smallSpacing
+   contentItem: ColumnLayout {
+      // the header with a collapse button and a global search field
+      QQC.ToolBar {
+         Layout.fillWidth: true
 
-      RowLayout {
-         anchors.fill: parent
+         padding: Kirigami.Units.smallSpacing
 
-         spacing: Kirigami.Units.smallSpacing
+         RowLayout {
+            anchors.fill: parent
 
-         QQC.Button {
-            id: collapseButton
+            spacing: Kirigami.Units.smallSpacing
 
-            // this size matches that of the icons in the ListView below
-            implicitHeight: Kirigami.Units.iconSizes.medium + Kirigami.Units.smallSpacing * 2
-            implicitWidth: Kirigami.Units.iconSizes.medium + Kirigami.Units.smallSpacing * 2
+            QQC.Button {
+               id: collapseButton
 
-            flat: true
+               // this size matches that of the icons in the ListView below
+               implicitHeight: Kirigami.Units.iconSizes.medium + Kirigami.Units.smallSpacing * 2
+               implicitWidth: Kirigami.Units.iconSizes.medium + Kirigami.Units.smallSpacing * 2
 
-            icon.name: root.collapsed ? "sidebar-expand-left" : "sidebar-collapse-left"
-            icon.height: Kirigami.Units.iconSizes.smallMedium
-            icon.width: Kirigami.Units.iconSizes.smallMedium
+               flat: true
 
-            QQC.ToolTip.visible: hovered
-            QQC.ToolTip.text: root.collapsed ? i18nc("@info:tooltip", "Open sidebar") : i18nc("@info:tooltip", "Close sidebar")
-            QQC.ToolTip.delay: Kirigami.Units.toolTipDelay
+               icon.name: root.collapsed ? "sidebar-expand-left" : "sidebar-collapse-left"
+               icon.height: Kirigami.Units.iconSizes.smallMedium
+               icon.width: Kirigami.Units.iconSizes.smallMedium
 
-            onClicked: toggleSidebar()
-            Keys.onReturnPressed: toggleSidebar()
-         }
+               QQC.ToolTip.visible: hovered
+               QQC.ToolTip.text: root.collapsed ? i18nc("@info:tooltip", "Open sidebar") : i18nc("@info:tooltip", "Close sidebar")
+               QQC.ToolTip.delay: Kirigami.Units.toolTipDelay
 
-         Kirigami.SearchField {
-            id: searchbar
-
-            visible: !root.collapsed
-            Layout.fillWidth: true
-            // Layout.fillHeight: true
-
-            Keys.onDownPressed: {
-               listView.forceActiveFocus();
-               listView.currentIndex = 0;
+               onClicked: toggleSidebar()
+               Keys.onReturnPressed: toggleSidebar()
             }
 
-            // TODO make it functional
+            Kirigami.SearchField {
+               id: searchbar
+
+               visible: !root.collapsed
+               Layout.fillWidth: true
+               // Layout.fillHeight: true
+
+               Keys.onDownPressed: {
+                  listView.forceActiveFocus();
+                  listView.currentIndex = 0;
+               }
+
+               // TODO make it functional
+            }
          }
       }
-   }
 
-   contentItem: QQC.ScrollView {
-      ListView {
-         id: listView
+      QQC.ScrollView {
+         Layout.fillHeight: true
+         Layout.fillWidth: true
 
-         //---------------------Keyboard navigation---------------------DOWN
-         activeFocusOnTab: true
+         ListView {
+            id: listView
 
-         Keys.onReturnPressed: selectCurrentItem()
-         Keys.onEnterPressed: selectCurrentItem()
+            //---------------------Keyboard navigation---------------------DOWN
+            activeFocusOnTab: true
 
-         Keys.onUpPressed: {
-            if (currentIndex === 0 && searchbar.visible)
-               searchbar.forceActiveFocus();
-            else
-               decrementCurrentIndex();
-         }
+            Keys.onReturnPressed: selectCurrentItem()
+            Keys.onEnterPressed: selectCurrentItem()
 
-         function selectCurrentItem() {
-            const d = currentItem;
-            if (!d)
-               return;
-
-            mainDrawerModel.selectedItem = d.index;
-         }
-         //---------------------Keyboard navigation---------------------UP
-
-         topMargin: Kirigami.Units.smallSpacing
-         bottomMargin: Kirigami.Units.largeSpacing
-         spacing: Kirigami.Units.smallSpacing
-
-         model: mainDrawerModel
-
-         section {
-            property: "sectionRole"
-            delegate: CollapsibleListSectionHeader {
-               width: ListView.view.width
-
-               text: root.collapsed ? "" : section
+            Keys.onUpPressed: {
+               if (currentIndex === 0 && searchbar.visible)
+                  searchbar.forceActiveFocus();
+               else
+                  decrementCurrentIndex();
             }
-         }
 
-         delegate: QQC.ItemDelegate {
-            required property int index
-            required property string nameRole
-            required property string iconNameRole
+            function selectCurrentItem() {
+               const d = currentItem;
+               if (!d)
+                  return;
 
-            topInset: 0
-            topPadding: Kirigami.Units.smallSpacing
-            bottomInset: 0
-            bottomPadding: Kirigami.Units.smallSpacing
-            leftInset: Kirigami.Units.smallSpacing
-            rightInset: Kirigami.Units.smallSpacing
+               mainDrawerModel.selectedItem = d.index;
+            }
+            //---------------------Keyboard navigation---------------------UP
 
-            highlighted: mainDrawerModel.selectedItem === index
+            topMargin: Kirigami.Units.smallSpacing
+            bottomMargin: Kirigami.Units.largeSpacing
+            spacing: Kirigami.Units.smallSpacing
 
-            // height: Kirigami.Units.smallSpacing + Kirigami.Units.iconSizes.medium + Kirigami.Units.smallSpacing
-            width: ListView.view?.width ?? 0
+            model: mainDrawerModel
 
-            contentItem: RowLayout {
-               Kirigami.Icon {
-                  source: iconNameRole
-                  implicitWidth: Kirigami.Units.iconSizes.medium
-                  implicitHeight: Kirigami.Units.iconSizes.medium
+            section {
+               property: "sectionRole"
+               delegate: CollapsibleListSectionHeader {
+                  width: ListView.view.width
+
+                  text: root.collapsed ? "" : section
+               }
+            }
+
+            delegate: QQC.ItemDelegate {
+               required property int index
+               required property string nameRole
+               required property string iconNameRole
+
+               topInset: 0
+               topPadding: Kirigami.Units.smallSpacing
+               bottomInset: 0
+               bottomPadding: Kirigami.Units.smallSpacing
+               leftInset: Kirigami.Units.smallSpacing
+               rightInset: Kirigami.Units.smallSpacing
+
+               highlighted: mainDrawerModel.selectedItem === index
+
+               // height: Kirigami.Units.smallSpacing + Kirigami.Units.iconSizes.medium + Kirigami.Units.smallSpacing
+               width: ListView.view?.width ?? 0
+
+               contentItem: RowLayout {
+                  Kirigami.Icon {
+                     source: iconNameRole
+                     implicitWidth: Kirigami.Units.iconSizes.medium
+                     implicitHeight: Kirigami.Units.iconSizes.medium
+                  }
+
+                  QQC.Label {
+                     visible: !root.collapsed
+                     Layout.fillWidth: true
+
+                     elide: LayoutMirroring.enabled ? Text.ElideLeft : Text.ElideRight
+
+                     text: nameRole
+                  }
                }
 
-               QQC.Label {
-                  visible: !root.collapsed
-                  Layout.fillWidth: true
-
-                  elide: LayoutMirroring.enabled ? Text.ElideLeft : Text.ElideRight
-
+               QQC.ToolTip {
+                  visible: hovered && root.collapsed
                   text: nameRole
+                  delay: Kirigami.Units.toolTipDelay
                }
-            }
 
-            QQC.ToolTip {
-               visible: hovered && root.collapsed
-               text: nameRole
-               delay: Kirigami.Units.toolTipDelay
-            }
-
-            onClicked: {
-               mainDrawerModel.selectedItem = index;
-               listView.currentIndex = index;
-               listView.forceActiveFocus();
+               onClicked: {
+                  mainDrawerModel.selectedItem = index;
+                  listView.currentIndex = index;
+                  listView.forceActiveFocus();
+               }
             }
          }
       }

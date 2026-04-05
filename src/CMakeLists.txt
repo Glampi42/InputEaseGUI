@@ -15,6 +15,10 @@ ecm_target_qml_sources(inputeasegui_start
     Main.qml
     qml/MainToolbar.qml
     qml/MainDrawer.qml
+    qml/SubDrawer.qml
+    qml/GeneralSettingsPage.qml
+    qml/DeviceRulesPage.qml
+    qml/TriggerSettingsPage.qml
     qml/CollapsibleListSectionHeader.qml
 )
 
