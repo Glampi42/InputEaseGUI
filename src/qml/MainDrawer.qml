@@ -80,9 +80,9 @@ Kirigami.OverlayDrawer {
             QQC.Button {
                id: collapseButton
 
-               // this size matches that of the icons in the ListView below
+               // this size matches that of the icons in the ListView below when they are collapsed (big)
                implicitHeight: Kirigami.Units.iconSizes.smallMedium + Kirigami.Units.smallSpacing * 2
-               implicitWidth: sidebarCollapsed ? Kirigami.Units.iconSizes.medium + Kirigami.Units.smallSpacing * 2 : implicitHeight
+               implicitWidth:  Kirigami.Units.iconSizes.medium + Kirigami.Units.smallSpacing * 2
 
                flat: true
 
@@ -160,6 +160,8 @@ Kirigami.OverlayDrawer {
             }
 
             delegate: QQC.ItemDelegate {
+               id: listDelegate
+
                required property int index
                required property string nameRole
                required property string iconNameRole
@@ -178,9 +180,11 @@ Kirigami.OverlayDrawer {
 
                contentItem: RowLayout {
                   Kirigami.Icon {
+                     id: listDelegateIcon
+
                      source: iconNameRole
-                     implicitWidth:  sidebarCollapsed ? Kirigami.Units.iconSizes.medium : Kirigami.Units.iconSizes.smallMedium
-                     implicitHeight: sidebarCollapsed ? Kirigami.Units.iconSizes.medium : Kirigami.Units.iconSizes.smallMedium
+                     implicitWidth:  Kirigami.Units.iconSizes.smallMedium
+                     implicitHeight: implicitWidth
                   }
 
                   QQC.Label {
@@ -203,6 +207,55 @@ Kirigami.OverlayDrawer {
                   mainDrawerModel.selectedItem = index;
                   listView.currentIndex = index;
                   listView.forceActiveFocus();
+               }
+
+               property bool _collapsed: sidebarCollapsed
+
+               // to make the transition between smallMedium <-> medium icon sizes more smooth:
+               on_CollapsedChanged: {
+                  if (_collapsed) {
+                     iconExpandSeq.stop();
+                     iconCollapseSeq.restart();
+                  } else {
+                     iconCollapseSeq.stop();
+                     iconExpandSeq.restart();
+                  }
+               }
+
+               // Collapse sequence: item height grows first, then icon expands
+               SequentialAnimation {
+                  id: iconCollapseSeq
+
+                  NumberAnimation {
+                     target: listDelegate
+                     property: "height"
+                     to: Kirigami.Units.smallSpacing*2 + Kirigami.Units.iconSizes.medium
+                     duration: Kirigami.Units.shortDuration
+                     easing.type: Easing.InOutCubic
+                  }
+                  PropertyAction {
+                     target: listDelegateIcon
+                     property: "implicitWidth"
+                     value: Kirigami.Units.iconSizes.medium
+                  }
+               }
+
+               // Expand sequence: icon shrinks first, then item height catches up
+               SequentialAnimation {
+                  id: iconExpandSeq
+
+                  PropertyAction {
+                     target: listDelegateIcon
+                     property: "implicitWidth"
+                     value: Kirigami.Units.iconSizes.smallMedium
+                  }
+                  NumberAnimation {
+                     target: listDelegate
+                     property: "height"
+                     to: Kirigami.Units.smallSpacing*2 + Kirigami.Units.iconSizes.smallMedium
+                     duration: Kirigami.Units.shortDuration
+                     easing.type: Easing.InOutCubic
+                  }
                }
             }
          }
