@@ -26,6 +26,7 @@ QtObject {
 
    // global application constants
    readonly property QtObject global: QtObject {
-
+      property int window_width: 800
+      property int window_height: 500
    }
 }

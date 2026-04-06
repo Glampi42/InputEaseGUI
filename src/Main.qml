@@ -7,19 +7,6 @@ import org.kde.kirigami as Kirigami
 Kirigami.ApplicationWindow {
    id: root
 
-   //-------------General properties-------------DOWN
-   property int window_width: 800
-   property int window_height: 500
-
-   // Qt.LeftToRight for English, Qt.RightToLeft for Arabic
-   property int text_alignment: Qt.application.layoutDirection
-   property int text_alignment_reverse: Qt.application.layoutDirection === Qt.LeftToRight ? Qt.RightToLeft : Qt.LeftToRight
-
-   // Qt.AlignLeft for English, Qt.AlignRight for Arabic
-   property int layout_alignment: !LayoutMirroring.enabled ? Qt.AlignLeft : Qt.AlignRight
-   property int layout_alignment_reverse: !LayoutMirroring.enabled ? Qt.AlignRight : Qt.AlignLeft
-   //-------------General properties-------------UP
-
    //-------------------Pop-ups-------------------DOWN
    // FATAL — dismiss exits the app, no background dismiss
    Kirigami.PromptDialog {
@@ -123,8 +110,8 @@ Kirigami.ApplicationWindow {
    }
    //-------------------Pop-ups-------------------UP
 
-   width: window_width
-   height: window_height
+   width: UIConstants.global.window_width
+   height: UIConstants.global.window_height
    visible: true
 
    title: i18nc("@title:window", "Input Ease GUI")
