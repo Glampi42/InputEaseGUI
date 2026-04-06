@@ -129,17 +129,32 @@ Kirigami.ApplicationWindow {
 
    title: i18nc("@title:window", "Input Ease GUI")
 
-   pageStack.columnView.columnResizeMode: Kirigami.ColumnView.DynamicColumns
-
    // the main toolbar with buttons that adjust their function based on the selected item
    // header: MainToolbar {}
-
-   pageStack.leftSidebar: MainDrawer {}
 
    Component.onCompleted: {
       pageStack.globalToolBar.style = Kirigami.ApplicationHeaderStyle.None;
 
-      pageStack.push(generalSettingsPage);// general settings open initially
+      pageStack.push(generalSettingsInfoPane);// general settings open initially
+   }
+
+   // the window width at which the view switches between multi-column view and single-column view
+   property int criticalWidth: mainDrawer.width + subDrawerPage.preferredWidth + UIConstants.infoPane.minWidth
+
+   pageStack {
+      leftSidebar: MainDrawer { id: mainDrawer }
+
+      // this property is basically only used by the InfoPanes and serves as their minimumWidth
+      //(idk why it doesn't use their Kirigami.ColumnView.minimumWidth property instead, but okay)
+      defaultColumnWidth: UIConstants.infoPane.minWidth
+
+      // show both the SubDrawer and the info page if wide enough, only one page at a time otherwise
+      columnView.columnResizeMode: (width > criticalWidth) ? Kirigami.ColumnView.DynamicColumns : Kirigami.ColumnView.SingleColumn
+      globalToolBar.canContainHandles: true
+      globalToolBar {
+         style: Kirigami.ApplicationHeaderStyle.ToolBar
+         showNavigationButtons: Kirigami.ApplicationHeaderStyle.ShowBackButton | Kirigami.ApplicationHeaderStyle.ShowForwardButton
+      }
    }
 
    //-----------------Pushing/popping Kirigami.Pages-----------------DOWN
@@ -148,9 +163,9 @@ Kirigami.ApplicationWindow {
    }
 
    readonly property var subDrawerPage: pagePool.loadPage(Qt.resolvedUrl("SubDrawer.qml"))
-   readonly property var generalSettingsPage: pagePool.loadPage(Qt.resolvedUrl("GeneralSettingsPage.qml"))
-   readonly property var deviceRulesPage: pagePool.loadPage(Qt.resolvedUrl("DeviceRulesPage.qml"))
-   readonly property var triggerSettingsPage: pagePool.loadPage(Qt.resolvedUrl("TriggerSettingsPage.qml"))
+   readonly property var generalSettingsInfoPane: pagePool.loadPage(Qt.resolvedUrl("GeneralSettingsInfoPane.qml"))
+   readonly property var deviceRulesInfoPane: pagePool.loadPage(Qt.resolvedUrl("DeviceRulesInfoPane.qml"))
+   readonly property var triggerInfoPane: pagePool.loadPage(Qt.resolvedUrl("TriggerInfoPane.qml"))
 
    Connections {
       target: mainDrawerModel
@@ -159,38 +174,39 @@ Kirigami.ApplicationWindow {
          switch (mainDrawerModel.selectedItem) {
          case 0:// General Settings
             pageStack.removePage(subDrawerPage);
-            pageStack.removePage(deviceRulesPage);
-            pageStack.removePage(triggerSettingsPage);
+            pageStack.removePage(deviceRulesInfoPane);
+            pageStack.removePage(triggerInfoPane);
 
-            if(!containsPage(generalSettingsPage))
-               pageStack.push(generalSettingsPage);
+            if (!containsPage(generalSettingsInfoPane))
+               pageStack.push(generalSettingsInfoPane);
             break;
          case 1:// Device Rules
-            pageStack.removePage(generalSettingsPage);
-            pageStack.removePage(triggerSettingsPage);
+            pageStack.removePage(generalSettingsInfoPane);
+            pageStack.removePage(triggerInfoPane);
 
-            if(!containsPage(subDrawerPage))
-               pageStack.push(subDrawerPage);
-            if(!containsPage(deviceRulesPage))
-               pageStack.push(deviceRulesPage);
+            if (!containsPage(subDrawerPage))
+               insertPage(0, subDrawerPage);// MainDrawer doesn't count for the page count, that's why insert index 0
+            if (!containsPage(deviceRulesInfoPane))
+               pageStack.push(deviceRulesInfoPane);
             break;
          default:
             // A specific device
             if (mainDrawerModel.selectedItem < 0)
                break;// just in case
 
-            pageStack.removePage(generalSettingsPage);
-            pageStack.removePage(deviceRulesPage);
+            pageStack.removePage(generalSettingsInfoPane);
+            pageStack.removePage(deviceRulesInfoPane);
 
-            if(!containsPage(subDrawerPage))
-               pageStack.push(subDrawerPage);
-            if(!containsPage(triggerSettingsPage))
-               pageStack.push(triggerSettingsPage);
+            if (!containsPage(subDrawerPage))
+               insertPage(0, subDrawerPage);
+            if (!containsPage(triggerInfoPane))
+               pageStack.push(triggerInfoPane);
             break;
          }
       }
    }
 
+   // Returns true if the pageStack contains the page, false otherwise
    function containsPage(page) {
       for (let i = 0; i < pageStack.depth; i++) {
          if (pageStack.get(i) === page) {
@@ -199,6 +215,15 @@ Kirigami.ApplicationWindow {
       }
 
       return false;
+   }
+
+   // Tries to insert the page at pos into the pageStack; pushes it if the pos is larger than pageStack.depth
+   function insertPage(pos, page) {
+      if (pageStack.depth > pos) {
+         pageStack.insertPage(pos, page);
+      } else {
+         pageStack.push(page);
+      }
    }
    //-----------------Pushing/popping Kirigami.Pages-----------------UP
 }

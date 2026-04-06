@@ -66,6 +66,8 @@ Kirigami.OverlayDrawer {
    padding: 0
 
    contentItem: ColumnLayout {
+      spacing: 0
+
       // the header with a collapse button and a global search field
       QQC.ToolBar {
          Layout.fillWidth: true
@@ -266,8 +268,8 @@ Kirigami.OverlayDrawer {
       id: _private
 
       property int targetWidth: root.sidebarCollapsed ? minWidth : maxWidth
-      readonly property int maxWidth: Kirigami.Units.gridUnit * 13
-      readonly property int collapseWidth: Kirigami.Units.gridUnit * 5// the sidebar will collapse when it goes below this width
-      readonly property int minWidth: Kirigami.Units.smallSpacing * 2 + Kirigami.Units.iconSizes.medium + Kirigami.Units.smallSpacing * 2
+      readonly property int maxWidth: UIConstants.mainDrawer.maxWidth
+      readonly property int collapseWidth: UIConstants.mainDrawer.collapseWidth// the sidebar will collapse when it goes below this width
+      readonly property int minWidth: UIConstants.mainDrawer.minWidth
    }
 }

@@ -1,5 +1,7 @@
 add_executable(inputeasegui_start)
 
+set_source_files_properties(qml/UIConstants.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
+
 ecm_add_qml_module(inputeasegui_start
     URI
     me.glampi.inputeasegui
@@ -16,10 +18,11 @@ ecm_target_qml_sources(inputeasegui_start
     qml/MainToolbar.qml
     qml/MainDrawer.qml
     qml/SubDrawer.qml
-    qml/GeneralSettingsPage.qml
-    qml/DeviceRulesPage.qml
-    qml/TriggerSettingsPage.qml
+    qml/GeneralSettingsInfoPane.qml
+    qml/DeviceRulesInfoPane.qml
+    qml/TriggerInfoPane.qml
     qml/CollapsibleListSectionHeader.qml
+    qml/UIConstants.qml
 )
 
 target_link_libraries(inputeasegui_start
