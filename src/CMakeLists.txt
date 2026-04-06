@@ -1,6 +1,6 @@
 add_executable(inputeasegui_start)
 
-set_source_files_properties(qml/UIConstants.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
+set_source_files_properties(qml/helpers/UIConstants.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 
 ecm_add_qml_module(inputeasegui_start
     URI
@@ -21,8 +21,8 @@ ecm_target_qml_sources(inputeasegui_start
     qml/GeneralSettingsInfoPane.qml
     qml/DeviceRulesInfoPane.qml
     qml/TriggerInfoPane.qml
-    qml/CollapsibleListSectionHeader.qml
-    qml/UIConstants.qml
+    qml/helpers/UIConstants.qml
+    qml/helpers/CollapsibleListSectionHeader.qml
 )
 
 target_link_libraries(inputeasegui_start
