@@ -119,8 +119,10 @@ Kirigami.ApplicationWindow {
    // the main toolbar with buttons that adjust their function based on the selected item
    // header: MainToolbar {}
 
+   globalDrawer: MainDrawer { id: mainDrawer }
+
    Component.onCompleted: {
-      pageStack.globalToolBar.style = Kirigami.ApplicationHeaderStyle.None;
+      pageStack.globalToolBar.style = Kirigami.ApplicationHeaderStyle.ToolBar;
 
       pageStack.push(generalSettingsInfoPane);// general settings open initially
    }
@@ -129,8 +131,6 @@ Kirigami.ApplicationWindow {
    property int criticalWidth: mainDrawer.width + subDrawerPage.preferredWidth + UIConstants.infoPane.minWidth
 
    pageStack {
-      leftSidebar: MainDrawer { id: mainDrawer }
-
       // this property is basically only used by the InfoPanes and serves as their minimumWidth
       //(idk why it doesn't use their Kirigami.ColumnView.minimumWidth property instead, but okay)
       defaultColumnWidth: UIConstants.infoPane.minWidth
