@@ -140,7 +140,7 @@ Kirigami.ApplicationWindow {
       globalToolBar.canContainHandles: true
       globalToolBar {
          style: Kirigami.ApplicationHeaderStyle.ToolBar
-         showNavigationButtons: Kirigami.ApplicationHeaderStyle.ShowBackButton | Kirigami.ApplicationHeaderStyle.ShowForwardButton
+         showNavigationButtons: pageStack.currentIndex === 0 ? Kirigami.ApplicationHeaderStyle.ShowForwardButton : Kirigami.ApplicationHeaderStyle.ShowBackButton
       }
    }
 

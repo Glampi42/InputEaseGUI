@@ -14,15 +14,20 @@ Kirigami.GlobalDrawer {
 
    //--------------------Collapsing/expanding functionality--------------------DOWN
    property bool sidebarCollapsed: false
-   property bool animateWidth: true// whether the sidebar width change should be animated or not; should be true initially
+   property bool animateWidth: false// whether the sidebar width change should be animated or not
+   property bool currentlyAnimated: false// whether the sidebar's collapsing/expanding is currently animated
 
    function toggleSidebar() {
       if (sidebarCollapsed) {
-         preferredSize = _private.maxWidth;
+         animateWidth = true;
+         preferredSize = Qt.binding(() => _private.maxWidth);
+         animateWidth = false;
 
          sidebarCollapsed = false;
       } else {
-         preferredSize = _private.minWidth;
+         animateWidth = true;
+         preferredSize = Qt.binding(() => _private.minWidth);
+         animateWidth = false;
 
          sidebarCollapsed = true;
       }
@@ -32,16 +37,17 @@ Kirigami.GlobalDrawer {
    minimumSize: _private.minWidth
    maximumSize: _private.maxWidth
    onInteractiveResizingChanged: {
-      animateWidth = !interactiveResizing;
-
       if (!interactiveResizing && sidebarCollapsed) {
-         preferredSize = _private.minWidth;
+         // set drawer width to minWidth in case user released the handle close enough to minWidth (close enough == sidebarCollapsed is true)
+         animateWidth = true;
+         preferredSize = Qt.binding(() => _private.minWidth);
+         animateWidth = false;
       }
    }
-   preferredSize: _private.targetWidth
+   preferredSize: _private.maxWidth// initial width
    onPreferredSizeChanged: {
       if (!interactiveResizing)
-         return;// ignore all resizing done with the resize button/automatically
+         return;
 
       if (width > _private.collapseWidth) {
          sidebarCollapsed = false;
@@ -56,6 +62,8 @@ Kirigami.GlobalDrawer {
       NumberAnimation {
          duration: Kirigami.Units.longDuration
          easing.type: Easing.InOutQuad
+
+         onRunningChanged: currentlyAnimated = running
       }
    }
    //--------------------Collapsing/expanding functionality--------------------UP
@@ -63,13 +71,13 @@ Kirigami.GlobalDrawer {
    Kirigami.Theme.colorSet: Kirigami.Theme.View
    Kirigami.Theme.inherit: false
 
-   padding: 0
-
    showHeaderWhenCollapsed: true
 
    // the header with a collapse button and a global search field
    header: QQC.ToolBar {
       Layout.fillWidth: true
+
+      padding: Kirigami.Units.smallSpacing
 
       RowLayout {
          anchors.fill: parent
@@ -114,6 +122,10 @@ Kirigami.GlobalDrawer {
    }
 
    content: QQC.ScrollView {
+      id: scrollView
+
+      property bool scrollbarVisible: QQC.ScrollBar.vertical.visible
+
       Layout.fillHeight: true
       Layout.fillWidth: true
 
@@ -262,9 +274,10 @@ Kirigami.GlobalDrawer {
    QtObject {
       id: _private
 
-      property int targetWidth: root.sidebarCollapsed ? minWidth : maxWidth
-      readonly property int maxWidth: UIConstants.mainDrawer.maxWidth
-      readonly property int collapseWidth: UIConstants.mainDrawer.collapseWidth// the sidebar will collapse when it goes below this width
-      readonly property int minWidth: UIConstants.mainDrawer.minWidth
+      property int scrollbarWidth: scrollView.scrollbarVisible ? 21/*the width of the scrollbar*/ : 0
+
+      readonly property int maxWidth: UIConstants.mainDrawer.maxWidth + scrollbarWidth
+      readonly property int collapseWidth: UIConstants.mainDrawer.collapseWidth + scrollbarWidth// the sidebar will collapse when it goes below this width
+      readonly property int minWidth: UIConstants.mainDrawer.minWidth + scrollbarWidth
    }
 }
