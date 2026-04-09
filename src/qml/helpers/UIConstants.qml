@@ -16,7 +16,9 @@ QtObject {
 
    // constants used primarily by SubDrawer
    readonly property QtObject subDrawer: QtObject {
-      readonly property int width: Kirigami.Units.gridUnit * 14
+      readonly property int initialWidth: Kirigami.Units.gridUnit * 14
+      readonly property int maxWidth: Kirigami.Units.gridUnit * 30
+      readonly property int minWidth: Kirigami.Units.gridUnit * 8
    }
 
    // constants related to the pane that displays various info, such as: GeneralSettingsInfoPane, DeviceRulesInfoPane, TriggerInfoPane

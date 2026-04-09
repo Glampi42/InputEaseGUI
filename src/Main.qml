@@ -128,7 +128,7 @@ Kirigami.ApplicationWindow {
    }
 
    // the window width at which the view switches between multi-column view and single-column view
-   property int criticalWidth: mainDrawer.width + subDrawerPage.preferredWidth + UIConstants.infoPane.minWidth
+   property int criticalWidth: mainDrawer.width + UIConstants.subDrawer.minWidth + UIConstants.infoPane.minWidth
 
    pageStack {
       // this property is basically only used by the InfoPanes and serves as their minimumWidth
