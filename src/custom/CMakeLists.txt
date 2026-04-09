@@ -10,4 +10,6 @@ target_sources(inputeasegui_start
    maindrawermodel.cpp
    maindraweritem.h
    maindraweritem.cpp
+   testtreemodel.h
+   testtreemodel.cpp
 )
