@@ -34,8 +34,10 @@ Kirigami.GlobalDrawer {
    }
 
    interactiveResizeEnabled: true
+   preferredSize: _private.maxWidth// initial width
    minimumSize: _private.minWidth
    maximumSize: _private.maxWidth
+
    onInteractiveResizingChanged: {
       if (!interactiveResizing && sidebarCollapsed) {
          // set drawer width to minWidth in case user released the handle close enough to minWidth (close enough == sidebarCollapsed is true)
@@ -44,8 +46,20 @@ Kirigami.GlobalDrawer {
          animateWidth = false;
       }
    }
-   preferredSize: _private.maxWidth// initial width
+   property bool ignoreChange: false
    onPreferredSizeChanged: {
+      if (ignoreChange)
+         return;
+
+      // clamp preferredSize to >= 1, because
+      // when preferredSize is <= 0, MainDrawer expands😡
+      if (preferredSize <= 0) {
+         ignoreChange = true;
+         preferredSize = 1;
+         ignoreChange = false;
+         return;
+      }
+
       if (!interactiveResizing)
          return;
 
