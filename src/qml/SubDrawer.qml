@@ -12,9 +12,11 @@ Kirigami.Page {
    Kirigami.ColumnView.maximumWidth: UIConstants.subDrawer.maxWidth
    Kirigami.ColumnView.minimumWidth: UIConstants.subDrawer.minWidth
 
+   Kirigami.Theme.colorSet: Kirigami.Theme.View
+   Kirigami.Theme.inherit: false
+
    //--------------------Shrink-when-not-enough-space functionality--------------------DOWN
-   property int _preferredWidth: Math.max(Kirigami.ColumnView.minimumWidth,
-                                                Math.min(userSetWidth, applicationWindow().pageStack.availableWidth - UIConstants.infoPane.minWidth))
+   property int _preferredWidth: Math.max(Kirigami.ColumnView.minimumWidth, Math.min(userSetWidth, applicationWindow().pageStack.availableWidth - UIConstants.infoPane.minWidth))
    property real userSetWidth: UIConstants.subDrawer.initialWidth// the width the user sets by dragging the right edge of the SubDrawer
    property bool ignoreResizing: false
 
@@ -22,7 +24,7 @@ Kirigami.Page {
    // _preferredWidth keeps track of the current _actual_ preferredWidth of the SubDrawer, and we keep it in sync with Kirigami.ColumnView.preferredWidth.
    on_PreferredWidthChanged: {
       ignoreResizing = true;
-      Kirigami.ColumnView.preferredWidth = _preferredWidth
+      Kirigami.ColumnView.preferredWidth = _preferredWidth;
       ignoreResizing = false;
    }
 
@@ -52,21 +54,34 @@ Kirigami.Page {
 
       anchors.fill: parent
 
-      background: Rectangle {
-         color: "gray"
-      }
-
       TreeView {
          clip: true
+         reuseItems: false// disable item pooling
 
          model: testTreeModel
 
-         delegate: Item {
-            implicitWidth: Math.max(padding + label.x + label.implicitWidth + padding, scrollView.availableWidth)
-            implicitHeight: label.implicitHeight * 1.5
+         topMargin: Kirigami.Units.smallSpacing
+         bottomMargin: Kirigami.Units.largeSpacing
+         rowSpacing: Kirigami.Units.smallSpacing
+
+         delegate: QQC.Pane {
+            id: delegate
+
+            hoverEnabled: true
+
+            implicitWidth: Math.max(leftPadding + contentWidth + rightPadding, scrollView.availableWidth)
+            implicitHeight: Kirigami.Units.smallSpacing + Kirigami.Units.iconSizes.smallMedium + Kirigami.Units.smallSpacing
+
+            leftInset: 1 + Kirigami.Units.smallSpacing// +1 because of the page separator line (I'm a perfectionist, okay?)
+            rightInset: Kirigami.Units.smallSpacing
+            topInset: 0
+            bottomInset: 0
+            leftPadding: leftInset + Kirigami.Units.smallSpacing
+            rightPadding: rightInset + Kirigami.Units.smallSpacing
+            topPadding: 0
+            bottomPadding: 0
 
             readonly property real indentation: 20
-            readonly property real padding: 5
 
             // Assigned to by TreeView:
             required property TreeView treeView
@@ -80,49 +95,68 @@ Kirigami.Page {
 
             // Rotate indicator when expanded by the user
             // (requires TreeView to have a selectionModel)
-            property Animation indicatorAnimation: NumberAnimation {
-               target: indicator
-               property: "rotation"
-               from: expanded ? 0 : 90
-               to: expanded ? 90 : 0
-               duration: 100
-               easing.type: Easing.OutQuart
-            }
-            TableView.onPooled: indicatorAnimation.complete()
-            TableView.onReused: if (current)
-               indicatorAnimation.start()
-            onExpandedChanged: indicator.rotation = expanded ? 90 : 0
+            // property Animation indicatorAnimation: NumberAnimation {
+            //    target: indicator
+            //    property: "rotation"
+            //    from: expanded ? 0 : 90
+            //    to: expanded ? 90 : 0
+            //    duration: 100
+            //    easing.type: Easing.OutQuart
+            // }
+            // TableView.onPooled: indicatorAnimation.complete()
+            // TableView.onReused: if (current)
+            //    indicatorAnimation.start()
+            onExpandedChanged: indicatorIcon.rotation = expanded ? 90 : 0
 
-            Rectangle {
+            background: Rectangle {
                id: background
-               anchors.fill: parent
-               color: row === treeView.currentRow ? palette.highlight : "black"
-               opacity: (treeView.alternatingRows && row % 2 !== 0) ? 0.3 : 0.1
+
+               color: hovered ? Kirigami.Theme.hoverColor : Kirigami.Theme.backgroundColor
             }
 
-            QQC.Label {
-               id: indicator
-               x: padding + (depth * indentation)
-               anchors.verticalCenter: parent.verticalCenter
-               visible: isTreeNode && hasChildren
-               text: "▶"
+            contentItem: RowLayout {
+               id: rowLayout
 
-               TapHandler {
-                  onSingleTapped: {
-                     let index = treeView.index(row, column);
-                     // treeView.selectionModel.setCurrentIndex(index, ItemSelectionModel.NoUpdate)
-                     treeView.toggleExpanded(row);
+               spacing: Kirigami.Units.smallSpacing
+
+               // collapse/expand button
+               QQC.Button {
+                  id: collapseExpandBtn
+
+                  Layout.alignment: Qt.AlignVCenter
+
+                  implicitWidth: Kirigami.Units.iconSizes.smallMedium
+                  implicitHeight: Kirigami.Units.iconSizes.smallMedium
+
+                  padding: 0
+
+                  visible: isTreeNode && hasChildren
+
+                  Kirigami.Icon {
+                     id: indicatorIcon
+
+                     source: "go-next"
+                     width: Kirigami.Units.iconSizes.smallMedium
+                     height: Kirigami.Units.iconSizes.smallMedium
+                  }
+
+                  TapHandler {
+                     onSingleTapped: {
+                        let index = treeView.index(row, column);
+                        // treeView.selectionModel.setCurrentIndex(index, ItemSelectionModel.NoUpdate)
+                        treeView.toggleExpanded(row);
+                     }
                   }
                }
-            }
 
-            QQC.Label {
-               id: label
-               x: padding + (isTreeNode ? (depth + 1) * indentation : 0)
-               anchors.verticalCenter: parent.verticalCenter
-               width: parent.width - padding - x
-               clip: true
-               text: model.display
+               QQC.Label {
+                  id: label
+
+                  Layout.alignment: Qt.AlignVCenter
+                  Layout.fillWidth: true
+
+                  text: model.display
+               }
             }
          }
       }
