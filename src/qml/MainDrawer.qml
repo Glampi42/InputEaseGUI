@@ -14,20 +14,16 @@ Kirigami.GlobalDrawer {
 
    //--------------------Collapsing/expanding functionality--------------------DOWN
    property bool sidebarCollapsed: false
-   property bool animateWidth: false// whether the sidebar width change should be animated or not
-   property bool currentlyAnimated: false// whether the sidebar's collapsing/expanding is currently animated
 
    function toggleSidebar() {
       if (sidebarCollapsed) {
-         animateWidth = true;
-         preferredSize = Qt.binding(() => _private.maxWidth);
-         animateWidth = false;
+         sidebarCollapseSeq.stop();
+         sidebarExpandSeq.restart();
 
          sidebarCollapsed = false;
       } else {
-         animateWidth = true;
-         preferredSize = Qt.binding(() => _private.minWidth);
-         animateWidth = false;
+         sidebarExpandSeq.stop();
+         sidebarCollapseSeq.restart();
 
          sidebarCollapsed = true;
       }
@@ -41,9 +37,8 @@ Kirigami.GlobalDrawer {
    onInteractiveResizingChanged: {
       if (!interactiveResizing && sidebarCollapsed) {
          // set drawer width to minWidth in case user released the handle close enough to minWidth (close enough == sidebarCollapsed is true)
-         animateWidth = true;
-         preferredSize = Qt.binding(() => _private.minWidth);
-         animateWidth = false;
+         sidebarExpandSeq.stop();
+         sidebarCollapseSeq.restart();
       }
    }
    property bool ignoreChange: false
@@ -70,14 +65,43 @@ Kirigami.GlobalDrawer {
       }
    }
 
-   Behavior on preferredSize {
-      enabled: animateWidth
+   SequentialAnimation {
+      id: sidebarCollapseSeq
 
+      ScriptAction {
+         script: root.preferredSize = root.preferredSize// breaks binding, keeps current value
+      }
       NumberAnimation {
+         target: root
+         property: "preferredSize"
+         to: _private.minWidth
          duration: Kirigami.Units.longDuration
          easing.type: Easing.InOutQuad
+      }
 
-         onRunningChanged: currentlyAnimated = running
+      onFinished: {
+         // create binding to minWidth after the animation
+         root.preferredSize = Qt.binding(() => _private.minWidth);
+      }
+   }
+
+   SequentialAnimation {
+      id: sidebarExpandSeq
+
+      ScriptAction {
+         script: root.preferredSize = root.preferredSize// breaks binding, keeps current value
+      }
+      NumberAnimation {
+         target: root
+         property: "preferredSize"
+         to: _private.maxWidth
+         duration: Kirigami.Units.longDuration
+         easing.type: Easing.InOutQuad
+      }
+
+      onFinished: {
+         // create binding to maxWidth after the animation
+         root.preferredSize = Qt.binding(() => _private.maxWidth);
       }
    }
    //--------------------Collapsing/expanding functionality--------------------UP
@@ -103,7 +127,7 @@ Kirigami.GlobalDrawer {
 
             // this size matches that of the icons in the ListView below when they are big
             implicitHeight: Kirigami.Units.iconSizes.smallMedium + Kirigami.Units.smallSpacing * 2
-            implicitWidth:  Kirigami.Units.iconSizes.medium + Kirigami.Units.smallSpacing * 2
+            implicitWidth: Kirigami.Units.iconSizes.medium + Kirigami.Units.smallSpacing * 2
 
             flat: true
 
@@ -207,7 +231,7 @@ Kirigami.GlobalDrawer {
                   id: listDelegateIcon
 
                   source: iconNameRole
-                  implicitWidth:  Kirigami.Units.iconSizes.smallMedium
+                  implicitWidth: Kirigami.Units.iconSizes.smallMedium
                   implicitHeight: implicitWidth
                }
 
@@ -253,7 +277,7 @@ Kirigami.GlobalDrawer {
                NumberAnimation {
                   target: listDelegate
                   property: "height"
-                  to: Kirigami.Units.smallSpacing*2 + Kirigami.Units.iconSizes.medium
+                  to: Kirigami.Units.smallSpacing * 2 + Kirigami.Units.iconSizes.medium
                   duration: Kirigami.Units.shortDuration
                   easing.type: Easing.InOutCubic
                }
@@ -276,7 +300,7 @@ Kirigami.GlobalDrawer {
                NumberAnimation {
                   target: listDelegate
                   property: "height"
-                  to: Kirigami.Units.smallSpacing*2 + Kirigami.Units.iconSizes.smallMedium
+                  to: Kirigami.Units.smallSpacing * 2 + Kirigami.Units.iconSizes.smallMedium
                   duration: Kirigami.Units.shortDuration
                   easing.type: Easing.InOutCubic
                }
