@@ -6,6 +6,7 @@ import org.kde.kirigami as Kirigami
 // The page with the settings of a DeviceRule
 Kirigami.Page {
     Kirigami.ColumnView.fillWidth: true
+    Kirigami.ColumnView.minimumWidth: UIConstants.infoPane.minWidth
 
     Rectangle {
         anchors.fill: parent
