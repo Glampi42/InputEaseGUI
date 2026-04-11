@@ -47,8 +47,14 @@ int main(int argc, char *argv[])
 
     auto b = testModel->addItem(QStringLiteral("Root B"));
     testModel->addItem(QStringLiteral("A very useful gesture"), b);
+    testModel->addItem(QStringLiteral("Another useful gesture"), b);
+    auto b1 = testModel->addItem(QStringLiteral("Child B... does anyone care?"), b);
+    testModel->addItem(QStringLiteral("Yet another gesture"), b1);
+    testModel->addItem(QStringLiteral("Yet another gesture 2"), b1);
 
     testModel->addItem(QStringLiteral("Swipe gesture #4"));
+    testModel->addItem(QStringLiteral("Swipe gesture #5"));
+    testModel->addItem(QStringLiteral("Swipe gesture #6"));
 
     engine.rootContext()->setContextProperty(QStringLiteral("testTreeModel"), testModel);
 

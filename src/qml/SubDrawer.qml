@@ -55,8 +55,12 @@ Kirigami.Page {
       anchors.fill: parent
 
       TreeView {
+         id: treeView
+
          clip: true
          reuseItems: false// disable item pooling
+
+         alternatingRows: false
 
          model: testTreeModel
 
@@ -64,24 +68,45 @@ Kirigami.Page {
          bottomMargin: Kirigami.Units.largeSpacing
          rowSpacing: Kirigami.Units.smallSpacing
 
-         delegate: QQC.Pane {
+         delegate: QQC.ItemDelegate {
             id: delegate
 
-            hoverEnabled: true
+            // Checks whether this item is the last item at a given targetDepth.
+            function isLastAtDepth(targetDepth) {
+               if(!delegate.isTreeNode)
+                  return false;
 
-            implicitWidth: Math.max(leftPadding + contentWidth + rightPadding, scrollView.availableWidth)
+               if(delegate.hasChildren && delegate.expanded)
+                  return false;
+
+               var idx = treeView.index(delegate.row, delegate.column);
+               var siblingCount = treeView.model.rowCount(treeView.model.parent(idx));
+
+               var stepsUp = delegate.depth - targetDepth;
+               // go recursively through this item's parents
+               for (var i = 0; i < stepsUp; i++) {
+                  if(idx.row !== siblingCount - 1) {
+                     return false;// if not last item at this depth, it won't be last item at any lower depth
+                  }
+
+                  idx = treeView.model.parent(idx);
+                  siblingCount = treeView.model.rowCount(treeView.model.parent(idx));
+               }
+
+               return true;
+            }
+
+            implicitWidth: Math.max(leftPadding + contentItem.implicitWidth + rightPadding, scrollView.availableWidth)
             implicitHeight: Kirigami.Units.smallSpacing + Kirigami.Units.iconSizes.smallMedium + Kirigami.Units.smallSpacing
 
-            leftInset: 1 + Kirigami.Units.smallSpacing// +1 because of the page separator line (I'm a perfectionist, okay?)
+            leftInset: 1 + Kirigami.Units.smallSpacing + (depth * Kirigami.Units.iconSizes.smallMedium)// +1 because of the page separator line (I'm a perfectionist, okay?)
             rightInset: Kirigami.Units.smallSpacing
             topInset: 0
             bottomInset: 0
-            leftPadding: leftInset + Kirigami.Units.smallSpacing
+            leftPadding: 1 + Kirigami.Units.smallSpacing + Kirigami.Units.smallSpacing
             rightPadding: rightInset + Kirigami.Units.smallSpacing
             topPadding: 0
             bottomPadding: 0
-
-            readonly property real indentation: 20
 
             // Assigned to by TreeView:
             required property TreeView treeView
@@ -108,18 +133,44 @@ Kirigami.Page {
             //    indicatorAnimation.start()
             onExpandedChanged: indicatorIcon.rotation = expanded ? 90 : 0
 
-            background: Rectangle {
-               id: background
-
-               color: hovered ? Kirigami.Theme.hoverColor : Kirigami.Theme.backgroundColor
-            }
-
             contentItem: RowLayout {
                id: rowLayout
 
-               spacing: Kirigami.Units.smallSpacing
+               spacing: 0
 
-               // collapse/expand button
+               // tree indentation bars
+               Repeater {
+                  model: delegate.depth
+
+                  Item {
+                     id: treeBranch
+
+                     required property int index
+
+                     implicitHeight: Kirigami.Units.iconSizes.smallMedium
+                     implicitWidth: Kirigami.Units.iconSizes.smallMedium
+
+                     // vertical bar
+                     Kirigami.Separator {
+                        x: parent.width / 2 - 0.5
+                        y: 0 - Kirigami.Units.smallSpacing * 2
+
+                        implicitHeight: Kirigami.Units.iconSizes.smallMedium + Kirigami.Units.smallSpacing * 3.5
+                     }
+
+                     // horizontal bar
+                     Kirigami.Separator {
+                        visible: delegate.isLastAtDepth(treeBranch.index)
+
+                        x: parent.width / 2 - 0.5
+                        y: Kirigami.Units.iconSizes.smallMedium + Kirigami.Units.smallSpacing * 1.5 - 0.5
+
+                        implicitWidth: Kirigami.Units.iconSizes.smallMedium / 2 + 0.5
+                     }
+                  }
+               }
+
+               // collapse/expand arrow
                QQC.Button {
                   id: collapseExpandBtn
 
@@ -128,6 +179,8 @@ Kirigami.Page {
                   implicitWidth: Kirigami.Units.iconSizes.smallMedium
                   implicitHeight: Kirigami.Units.iconSizes.smallMedium
 
+                  flat: true
+
                   padding: 0
 
                   visible: isTreeNode && hasChildren
@@ -135,18 +188,35 @@ Kirigami.Page {
                   Kirigami.Icon {
                      id: indicatorIcon
 
+                     anchors.centerIn: parent
+
                      source: "go-next"
-                     width: Kirigami.Units.iconSizes.smallMedium
-                     height: Kirigami.Units.iconSizes.smallMedium
+                     width: Kirigami.Units.iconSizes.small
+                     height: Kirigami.Units.iconSizes.small
                   }
 
                   TapHandler {
                      onSingleTapped: {
                         let index = treeView.index(row, column);
-                        // treeView.selectionModel.setCurrentIndex(index, ItemSelectionModel.NoUpdate)
                         treeView.toggleExpanded(row);
                      }
                   }
+               }
+
+               // folder icon for trigger groups
+               Kirigami.Icon {
+                  id: folderIcon
+
+                  visible: isTreeNode && hasChildren
+
+                  source: "document-open-folder"
+                  implicitWidth: Kirigami.Units.iconSizes.smallMedium
+                  implicitHeight: Kirigami.Units.iconSizes.smallMedium
+               }
+
+               // separator
+               Item {
+                  implicitWidth: Kirigami.Units.smallSpacing
                }
 
                QQC.Label {
