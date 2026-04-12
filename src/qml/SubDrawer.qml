@@ -62,7 +62,42 @@ Kirigami.Page {
 
          alternatingRows: false
 
+         //---------------------Keyboard navigation---------------------DOWN
+         activeFocusOnTab: true
+
+         onActiveFocusChanged: {
+            if (activeFocus && !selectionModel.currentIndex.valid) {
+               selectionModel.setCurrentIndex(treeView.index(0, 0), ItemSelectionModel.ClearAndSelect);
+            }
+         }
+
+         Keys.onTabPressed: event => {
+            if (applicationWindow().pageStack.depth > 1) {
+               event.accepted = true;
+               applicationWindow().pageStack.get(1).forceActiveFocus(Qt.TabFocusReason);
+            }
+         }
+         Keys.onBacktabPressed: event => {
+            event.accepted = true;
+            applicationWindow().globalDrawer.forceActiveFocus(Qt.BacktabFocusReason);
+         }
+
+         Keys.onReturnPressed: selectCurrentItem()
+         Keys.onEnterPressed: selectCurrentItem()
+
+         function selectCurrentItem() {
+            const currentIndex = treeView.index(treeView.currentRow, treeView.currentColumn);
+            if (!currentIndex)
+               return;
+
+            testTreeModel.selectedItem = currentIndex;
+         }
+         //---------------------Keyboard navigation---------------------UP
+
          model: testTreeModel
+         selectionModel: ItemSelectionModel {
+            model: testTreeModel
+         }
 
          topMargin: Kirigami.Units.smallSpacing
          bottomMargin: Kirigami.Units.largeSpacing
@@ -73,10 +108,10 @@ Kirigami.Page {
 
             // Checks whether this item is the last item at a given targetDepth.
             function isLastAtDepth(targetDepth) {
-               if(!delegate.isTreeNode)
+               if (!delegate.isTreeNode)
                   return false;
 
-               if(delegate.hasChildren && delegate.expanded)
+               if (delegate.hasChildren && delegate.expanded)
                   return false;
 
                var idx = treeView.index(delegate.row, delegate.column);
@@ -85,7 +120,7 @@ Kirigami.Page {
                var stepsUp = delegate.depth - targetDepth;
                // go recursively through this item's parents
                for (var i = 0; i < stepsUp; i++) {
-                  if(idx.row !== siblingCount - 1) {
+                  if (idx.row !== siblingCount - 1) {
                      return false;// if not last item at this depth, it won't be last item at any lower depth
                   }
 
@@ -96,6 +131,7 @@ Kirigami.Page {
                return true;
             }
 
+            //----------------Spacing setup----------------DOWN
             implicitWidth: Math.max(leftPadding + contentItem.implicitWidth + rightPadding, scrollView.availableWidth)
             implicitHeight: Kirigami.Units.smallSpacing + Kirigami.Units.iconSizes.smallMedium + Kirigami.Units.smallSpacing
 
@@ -107,6 +143,7 @@ Kirigami.Page {
             rightPadding: rightInset + Kirigami.Units.smallSpacing
             topPadding: 0
             bottomPadding: 0
+            //----------------Spacing setup----------------UP
 
             // Assigned to by TreeView:
             required property TreeView treeView
@@ -117,6 +154,8 @@ Kirigami.Page {
             required property int row
             required property int column
             required property bool current
+
+            property var/*QModelIndex*/ itemIndex: treeView.index(row, column)
 
             // Rotate indicator when expanded by the user
             // (requires TreeView to have a selectionModel)
@@ -132,6 +171,15 @@ Kirigami.Page {
             // TableView.onReused: if (current)
             //    indicatorAnimation.start()
             onExpandedChanged: indicatorIcon.rotation = expanded ? 90 : 0
+
+            highlighted: testTreeModel.selectedItem === itemIndex
+            focus: delegate.current && treeView.activeFocus
+
+            onClicked: {
+               testTreeModel.selectedItem = itemIndex;
+               treeView.selectionModel.setCurrentIndex(treeView.index(row, column), ItemSelectionModel.NoUpdate);
+               treeView.forceActiveFocus();
+            }
 
             contentItem: RowLayout {
                id: rowLayout
@@ -180,7 +228,6 @@ Kirigami.Page {
                   implicitHeight: Kirigami.Units.iconSizes.smallMedium
 
                   flat: true
-
                   padding: 0
 
                   visible: isTreeNode && hasChildren

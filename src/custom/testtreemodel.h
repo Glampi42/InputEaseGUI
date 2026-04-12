@@ -21,6 +21,8 @@ class TestTreeModel : public QAbstractItemModel
 {
     Q_OBJECT
 
+    Q_PROPERTY(QModelIndex selectedItem READ qml_getSelectedItem WRITE qml_setSelectedItem NOTIFY selectedItemChanged FINAL)
+
 public:
     explicit TestTreeModel(QObject* parent = nullptr);
     ~TestTreeModel() override;
@@ -38,8 +40,20 @@ public:
     // Adds a child node under the given parent index (invalid = root)
     QModelIndex addItem(const QString& label, const QModelIndex& parent = {});
 
+    QModelIndex qml_getSelectedItem() { return nodeToIndex(m_selectedItem); }
+    void qml_setSelectedItem(QModelIndex selectedIdx) {
+        m_selectedItem = nodeFromIndex(selectedIdx);
+        Q_EMIT selectedItemChanged();
+    }
+
+Q_SIGNALS:
+    void selectedItemChanged();
+
 private:
     TreeNode* nodeFromIndex(const QModelIndex& index) const;
+    QModelIndex nodeToIndex(const TreeNode* node) const;
 
     TreeNode* m_root;
+
+    TreeNode* m_selectedItem;
 };

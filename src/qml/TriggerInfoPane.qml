@@ -9,6 +9,8 @@ Kirigami.Page {
     Kirigami.ColumnView.minimumWidth: UIConstants.infoPane.minWidth
 
     QQC.Switch {
+        focus: true
+
         text: "Trigger setting"
     }
 }

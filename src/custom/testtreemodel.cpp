@@ -3,7 +3,9 @@
 TestTreeModel::TestTreeModel(QObject* parent)
     : QAbstractItemModel(parent)
     , m_root(new TreeNode(QStringLiteral("root")))
-{}
+{
+    m_selectedItem = nullptr;
+}
 
 TestTreeModel::~TestTreeModel()
 {
@@ -66,6 +68,15 @@ TreeNode* TestTreeModel::nodeFromIndex(const QModelIndex& index) const
     if (!index.isValid())
         return m_root;
     return static_cast<TreeNode*>(index.internalPointer());
+}
+
+QModelIndex TestTreeModel::nodeToIndex(const TreeNode* node) const
+{
+    if (!node || node == m_root)
+        return {};
+
+    int row = node->parent->children.indexOf(node);
+    return createIndex(row, 0, node);
 }
 
 QVariant TestTreeModel::data(const QModelIndex& index, int role) const

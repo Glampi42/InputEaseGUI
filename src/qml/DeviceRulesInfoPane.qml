@@ -14,6 +14,8 @@ Kirigami.Page {
     }
 
     QQC.Switch {
+        focus: true
+
         text: "Device rule setting"
     }
 }
