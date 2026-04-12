@@ -141,6 +141,7 @@ Kirigami.GlobalDrawer {
 
             onClicked: toggleSidebar()
             Keys.onReturnPressed: toggleSidebar()
+            Keys.onEnterPressed: toggleSidebar()
          }
 
          Kirigami.SearchField {
