@@ -223,6 +223,7 @@ Kirigami.GlobalDrawer {
             rightInset: Kirigami.Units.smallSpacing
 
             highlighted: mainDrawerModel.selectedItem === index
+            background.opacity: listView.activeFocus ? 1 : 0.6
 
             // height: Kirigami.Units.smallSpacing + Kirigami.Units.iconSizes.smallMedium + Kirigami.Units.smallSpacing
             width: ListView.view?.width ?? 0

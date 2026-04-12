@@ -173,6 +173,7 @@ Kirigami.Page {
             onExpandedChanged: indicatorIcon.rotation = expanded ? 90 : 0
 
             highlighted: testTreeModel.selectedItem === itemIndex
+            background.opacity: treeView.activeFocus ? 1 : 0.6
             focus: delegate.current && treeView.activeFocus
 
             onClicked: {
