@@ -258,7 +258,7 @@ Kirigami.Page {
                Kirigami.Icon {
                   id: folderIcon
 
-                  visible: isTreeNode && hasChildren
+                  visible: isTreeNode && hasChildren//TODO other visibility condition
 
                   source: "document-open-folder"
                   implicitWidth: Kirigami.Units.iconSizes.smallMedium
