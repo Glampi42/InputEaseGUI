@@ -52,6 +52,8 @@ Kirigami.Page {
    QQC.ScrollView {
       id: scrollView
 
+      focus: true
+
       anchors.fill: parent
 
       TreeView {
@@ -63,6 +65,7 @@ Kirigami.Page {
          alternatingRows: false
 
          //---------------------Keyboard navigation---------------------DOWN
+         focus: true
          activeFocusOnTab: true
 
          onActiveFocusChanged: {
