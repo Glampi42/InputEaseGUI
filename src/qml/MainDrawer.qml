@@ -267,6 +267,8 @@ Kirigami.GlobalDrawer {
                }
 
                QQC.Label {
+                  id: delegateText
+
                   visible: !root.sidebarCollapsed
                   Layout.fillWidth: true
 
@@ -277,7 +279,7 @@ Kirigami.GlobalDrawer {
             }
 
             QQC.ToolTip {
-               visible: hovered && root.sidebarCollapsed
+               visible: hovered && (root.sidebarCollapsed || delegateText.truncated)
                text: nameRole
                delay: Kirigami.Units.toolTipDelay
             }
