@@ -106,6 +106,23 @@ Kirigami.Page {
          bottomMargin: Kirigami.Units.largeSpacing
          rowSpacing: Kirigami.Units.smallSpacing
 
+         //--------------------Animating collapsing/expanding--------------------DOWN
+         // needs to happen here instead of using onExpandedChanged() in the delegate,
+         // because that is unreliable (TreeView sometimes rebuilds delegates completely)
+         onExpanded: function (_row, _depth) {
+            Qt.callLater(function () {// treeView.index doesn't resolve if called right away
+               var expandedDelegate = treeView.itemAtIndex(treeView.index(_row, 0));
+               expandedDelegate.indicatorAnimation.restart();
+            });
+         }
+         onCollapsed: function (_row, _depth) {
+            Qt.callLater(function () {
+               var collapsedDelegate = treeView.itemAtIndex(treeView.index(_row, 0));
+               collapsedDelegate.indicatorAnimation.restart();
+            });
+         }
+         //--------------------Animating collapsing/expanding--------------------UP
+
          delegate: QQC.ItemDelegate {
             id: delegate
 
@@ -160,29 +177,27 @@ Kirigami.Page {
 
             property var/*QModelIndex*/ itemIndex: treeView.index(row, column)
 
-            // Rotate indicator when expanded by the user
-            // (requires TreeView to have a selectionModel)
-            // property Animation indicatorAnimation: NumberAnimation {
-            //    target: indicator
-            //    property: "rotation"
-            //    from: expanded ? 0 : 90
-            //    to: expanded ? 90 : 0
-            //    duration: 100
-            //    easing.type: Easing.OutQuart
-            // }
-            // TableView.onPooled: indicatorAnimation.complete()
-            // TableView.onReused: if (current)
-            //    indicatorAnimation.start()
-            onExpandedChanged: indicatorIcon.rotation = expanded ? 90 : 0
+            property Animation indicatorAnimation: NumberAnimation {
+               target: indicatorIcon
+               property: "rotation"
+               from: expanded ? 0 : 90
+               to: expanded ? 90 : 0
+               duration: Kirigami.Units.shortDuration
+               easing.type: Easing.OutQuart
+            }
 
             highlighted: testTreeModel.selectedItem === itemIndex
             background.opacity: treeView.activeFocus ? 1 : 0.6
-            focus: delegate.current && treeView.activeFocus
+            focus: delegate.current && treeView.activeFocus//FIXME this flickers when an item is expanded/collapsed
 
             onClicked: {
                testTreeModel.selectedItem = itemIndex;
-               treeView.selectionModel.setCurrentIndex(treeView.index(row, column), ItemSelectionModel.NoUpdate);
+               treeView.selectionModel.setCurrentIndex(treeView.index(delegate.row, delegate.column), ItemSelectionModel.NoUpdate);
                treeView.forceActiveFocus();
+            }
+
+            onDoubleClicked: {
+               treeView.toggleExpanded(delegate.row);
             }
 
             contentItem: RowLayout {
@@ -223,33 +238,63 @@ Kirigami.Page {
                }
 
                // collapse/expand arrow
-               QQC.Button {
+               Rectangle {
                   id: collapseExpandBtn
+
+                  visible: isTreeNode && hasChildren
+
+                  Kirigami.Theme.colorSet: Kirigami.Theme.Selection
+                  Kirigami.Theme.inherit: false
 
                   Layout.alignment: Qt.AlignVCenter
 
                   implicitWidth: Kirigami.Units.iconSizes.smallMedium
                   implicitHeight: Kirigami.Units.iconSizes.smallMedium
+                  radius: Kirigami.Units.cornerRadius
 
-                  flat: true
-                  padding: 0
+                  color: {
+                     if (testTreeModel.selectedItem === delegate.itemIndex) {// if this is the selected device
+                        (arrowArea.containsMouse && !arrowArea.containsPress) ? Kirigami.Theme.activeBackgroundColor : "transparent";
+                     } else {
+                        arrowArea.containsPress ? Kirigami.Theme.highlightColor : "transparent";
+                     }
+                  }
 
-                  visible: isTreeNode && hasChildren
+                  border.color: Kirigami.Theme.highlightColor
+                  border.width: arrowArea.containsMouse ? 1 : 0
 
+                  // the actual arrow
                   Kirigami.Icon {
                      id: indicatorIcon
 
                      anchors.centerIn: parent
 
-                     source: "go-next"
+                     source: "arrow-right"
                      width: Kirigami.Units.iconSizes.small
                      height: Kirigami.Units.iconSizes.small
+
+                     rotation: delegate.expanded ? 90 : 0
                   }
 
-                  TapHandler {
-                     onSingleTapped: {
-                        let index = treeView.index(row, column);
-                        treeView.toggleExpanded(row);
+                  // Dedicated input area for the arrow.
+                  // hoverEnabled drives the outline via containsMouse.
+                  // By accepting the mouse press (Qt default), it prevents
+                  // the event from reaching the parent delegate's button
+                  // handler, so onClicked on the delegate will not fire.
+                  MouseArea {
+                     id: arrowArea
+
+                     anchors.fill: parent
+                     hoverEnabled: true
+                     onClicked: {
+                        treeView.toggleExpanded(delegate.row);
+                        // make the expanded/collapsed entry current/focused entry:
+                        treeView.selectionModel.setCurrentIndex(treeView.index(delegate.row, delegate.column), ItemSelectionModel.NoUpdate);
+                        treeView.forceActiveFocus();
+                     }
+
+                     onDoubleClicked: {
+                        // nothing; this prevents double-clicks from collapsing/expanding the items twice in a row
                      }
                   }
                }
