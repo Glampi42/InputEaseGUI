@@ -125,6 +125,8 @@ Kirigami.ApplicationWindow {
       pageStack.globalToolBar.style = Kirigami.ApplicationHeaderStyle.ToolBar;
 
       pageStack.push(generalSettingsInfoPane);// general settings open initially
+
+      mainDrawer.focusListView();
    }
 
    // the window width at which the view switches between multi-column view and single-column view

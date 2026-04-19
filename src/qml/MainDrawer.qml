@@ -106,6 +106,10 @@ Kirigami.GlobalDrawer {
    }
    //--------------------Collapsing/expanding functionality--------------------UP
 
+   function focusListView() {
+      listView.forceActiveFocus();
+   }
+
    Kirigami.Theme.colorSet: Kirigami.Theme.View
    Kirigami.Theme.inherit: false
 
@@ -183,6 +187,8 @@ Kirigami.GlobalDrawer {
 
       property bool scrollbarVisible: QQC.ScrollBar.vertical.visible
 
+      focus: true
+
       Layout.fillHeight: true
       Layout.fillWidth: true
 
@@ -198,6 +204,7 @@ Kirigami.GlobalDrawer {
             return collapseButton;
          }
 
+         focus: true
          activeFocusOnTab: true
 
          Keys.onReturnPressed: selectCurrentItem()

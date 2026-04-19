@@ -177,13 +177,13 @@ Kirigami.Page {
 
             property var/*QModelIndex*/ itemIndex: treeView.index(row, column)
 
-            property Animation indicatorAnimation: NumberAnimation {
+            property Animation indicatorAnimation: NumberAnimation {//FIXME the arrow jumps to the end position for a single frame before the animation (probably same reason as the flicker below)
                target: indicatorIcon
                property: "rotation"
                from: expanded ? 0 : 90
                to: expanded ? 90 : 0
                duration: Kirigami.Units.shortDuration
-               easing.type: Easing.OutQuart
+               easing.type: Easing.InOutCubic
             }
 
             highlighted: testTreeModel.selectedItem === itemIndex
