@@ -23,7 +23,7 @@ QtObject {
 
    // constants related to the pane that displays various info, such as: GeneralSettingsInfoPane, DeviceRulesInfoPane, TriggerInfoPane
    readonly property QtObject infoPane: QtObject {
-      readonly property int minWidth: Kirigami.Units.gridUnit * 14
+      readonly property int minWidth: Kirigami.Units.gridUnit * 20
    }
 
    // global application constants

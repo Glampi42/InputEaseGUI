@@ -21,6 +21,7 @@ ecm_target_qml_sources(inputeasegui_start
     qml/GeneralSettingsInfoPane.qml
     qml/DeviceRulesInfoPane.qml
     qml/TriggerInfoPane.qml
+    qml/components/InfoPaneTabButton.qml
     qml/helpers/UIConstants.qml
     qml/helpers/CollapsibleListSectionHeader.qml
 )

@@ -5,12 +5,58 @@ import org.kde.kirigami as Kirigami
 
 // The page with the settings of a trigger/gesture
 Kirigami.Page {
-    Kirigami.ColumnView.fillWidth: true
-    Kirigami.ColumnView.minimumWidth: UIConstants.infoPane.minWidth
+   id: root
 
-    QQC.Switch {
-        focus: true
+   Kirigami.ColumnView.fillWidth: true
+   Kirigami.ColumnView.minimumWidth: UIConstants.infoPane.minWidth
 
-        text: "Trigger setting"
-    }
+   padding: 0
+
+   ColumnLayout {
+      anchors.fill: parent
+
+      QQC.TabBar {
+         id: tabBar
+
+         //---------------Keyboard navigation---------------DOWN
+         activeFocusOnTab: true
+
+         onActiveFocusChanged: {
+            if (activeFocus)
+               currentItem.forceActiveFocus(focusReason);
+         }
+         //---------------Keyboard navigation---------------UP
+
+         Layout.fillWidth: true
+
+         InfoPaneTabButton {
+            tabBar:  tabBar
+
+            text: "Tab 1"
+            width: UIConstants.infoPane.minWidth / tabBar.count
+         }
+         InfoPaneTabButton {
+            tabBar:  tabBar
+
+            text: "Tab 2"
+            width: UIConstants.infoPane.minWidth / tabBar.count
+         }
+         InfoPaneTabButton {
+            tabBar:  tabBar
+
+            text: "Tab three"
+            width: UIConstants.infoPane.minWidth / tabBar.count
+         }
+      }
+
+      QQC.Switch {
+         focus: true
+
+         text: "Trigger setting"
+      }
+
+      Item {
+         Layout.fillHeight: true
+      }
+   }
 }
