@@ -146,19 +146,6 @@ Kirigami.GlobalDrawer {
             onClicked: toggleSidebar()
             Keys.onReturnPressed: toggleSidebar()
             Keys.onEnterPressed: toggleSidebar()
-
-            //---------------------Keyboard navigation---------------------DOWN
-            property Item previousFocusTarget: {
-               if (applicationWindow().pageStack.depth > 0) {
-                  return applicationWindow().pageStack.lastItem;
-               }
-
-               return listView;
-            }
-
-            Keys.onTabPressed: searchbar.visible ? searchbar.forceActiveFocus(Qt.TabFocusReason) : listView.forceActiveFocus(Qt.TabFocusReason)
-            Keys.onBacktabPressed: previousFocusTarget.forceActiveFocus(Qt.BacktabFocusReason)
-            //---------------------Keyboard navigation---------------------UP
          }
 
          Kirigami.SearchField {
@@ -167,15 +154,10 @@ Kirigami.GlobalDrawer {
             visible: !root.sidebarCollapsed
             Layout.fillWidth: true
 
-            //---------------------Keyboard navigation---------------------DOWN
             Keys.onDownPressed: {
                listView.forceActiveFocus();
                listView.currentIndex = 0;
             }
-
-            Keys.onTabPressed: listView.forceActiveFocus(Qt.TabFocusReason)
-            Keys.onBacktabPressed: collapseButton.forceActiveFocus(Qt.BacktabFocusReason)
-            //---------------------Keyboard navigation---------------------UP
 
             // TODO make it functional
          }
@@ -196,13 +178,6 @@ Kirigami.GlobalDrawer {
          id: listView
 
          //---------------------Keyboard navigation---------------------DOWN
-         property Item nextFocusTarget: {
-            if (applicationWindow().pageStack.depth > 0) {
-               return applicationWindow().pageStack.get(0);
-            }
-
-            return collapseButton;
-         }
 
          focus: true
          activeFocusOnTab: true
@@ -224,9 +199,6 @@ Kirigami.GlobalDrawer {
 
             mainDrawerModel.selectedItem = d.index;
          }
-
-         Keys.onTabPressed: nextFocusTarget.forceActiveFocus(Qt.TabFocusReason)
-         Keys.onBacktabPressed: searchbar.visible ? searchbar.forceActiveFocus(Qt.BacktabFocusReason) : collapseButton.forceActiveFocus(Qt.BacktabFocusReason)
          //---------------------Keyboard navigation---------------------UP
 
          topMargin: 0

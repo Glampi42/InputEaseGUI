@@ -68,21 +68,20 @@ Kirigami.Page {
          focus: true
          activeFocusOnTab: true
 
+         // a TreeView steals tab navigation per default to move between the children, this undoes it
+         Keys.onTabPressed: event => {
+            nextItemInFocusChain().forceActiveFocus(Qt.TabFocusReason);
+            event.accepted = true;
+         }
+         Keys.onBacktabPressed: event => {
+            nextItemInFocusChain(false).forceActiveFocus(Qt.BacktabFocusReason);
+            event.accepted = true;
+         }
+
          onActiveFocusChanged: {
             if (activeFocus && !selectionModel.currentIndex.valid) {
                selectionModel.setCurrentIndex(treeView.index(0, 0), ItemSelectionModel.ClearAndSelect);
             }
-         }
-
-         Keys.onTabPressed: event => {
-            if (applicationWindow().pageStack.depth > 1) {
-               event.accepted = true;
-               applicationWindow().pageStack.get(1).forceActiveFocus(Qt.TabFocusReason);
-            }
-         }
-         Keys.onBacktabPressed: event => {
-            event.accepted = true;
-            applicationWindow().globalDrawer.forceActiveFocus(Qt.BacktabFocusReason);
          }
 
          Keys.onReturnPressed: selectCurrentItem()
@@ -125,6 +124,8 @@ Kirigami.Page {
 
          delegate: QQC.ItemDelegate {
             id: delegate
+
+            activeFocusOnTab: false
 
             // Checks whether this item is the last item at a given targetDepth.
             function isLastAtDepth(targetDepth) {
