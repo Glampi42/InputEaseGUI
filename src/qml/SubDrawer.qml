@@ -188,7 +188,7 @@ Kirigami.Page {
             }
 
             highlighted: testTreeModel.selectedItem === itemIndex
-            background.opacity: treeView.activeFocus ? 1 : 0.6
+            background.opacity: treeView.activeFocus ? 1 : 0.7
             focus: delegate.current && treeView.activeFocus//FIXME this flickers when an item is expanded/collapsed
 
             onClicked: {
