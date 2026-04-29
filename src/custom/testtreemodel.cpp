@@ -1,5 +1,7 @@
 #include "testtreemodel.h"
 
+#include <algorithm>
+
 TestTreeModel::TestTreeModel(QObject* parent)
     : QAbstractItemModel(parent)
     , m_root(new TreeNode(QStringLiteral("root")))
@@ -61,6 +63,31 @@ QModelIndex TestTreeModel::addItem(const QString& label, const QModelIndex& pare
     endInsertRows();
 
     return index(row, 0, parent);
+}
+
+bool TestTreeModel::moveRows(const QModelIndex& sourceParent, int sourceRow, int count, const QModelIndex& destinationParent, int destinationChild) {
+    if(count > 1) return false;// we don't do that here
+
+    TreeNode* sourceParentNode = nodeFromIndex(sourceParent);
+    TreeNode* targetNode = sourceParentNode->children.at(sourceRow);
+    TreeNode* newParentNode = nodeFromIndex(destinationParent);
+
+    if(targetNode == nullptr || newParentNode->children.count() < destinationChild) {
+        return false;// index mismatch
+    }
+
+    if(!beginMoveRows(sourceParent, sourceRow, sourceRow + count - 1, destinationParent, destinationChild)) {
+        return false;// tried to move the item either to where it was already, or to one of its own children
+    }
+
+    sourceParentNode->children.removeAt(sourceRow);
+
+    int insertIdx = std::max(0, std::min(destinationChild, (int) newParentNode->children.count()));
+    newParentNode->children.insert(insertIdx, targetNode);
+    targetNode->parent = newParentNode;
+
+    endMoveRows();
+    return true;
 }
 
 TreeNode* TestTreeModel::nodeFromIndex(const QModelIndex& index) const

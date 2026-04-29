@@ -92,13 +92,13 @@ Kirigami.Page {
             if (!currentIndex)
                return;
 
-            testTreeModel.selectedItem = currentIndex;
+            treeView.model.selectedItem = currentIndex;
          }
          //---------------------Keyboard navigation---------------------UP
 
          model: testTreeModel
          selectionModel: ItemSelectionModel {
-            model: testTreeModel
+            model: treeView.model
          }
 
          topMargin: Kirigami.Units.smallSpacing
@@ -115,7 +115,7 @@ Kirigami.Page {
             });
          }
          onCollapsed: function (_row, _depth) {
-            Qt.callLater(function () {
+            Qt.callLater(function () {// treeView.index doesn't resolve if called right away
                var collapsedDelegate = treeView.itemAtIndex(treeView.index(_row, 0));
                collapsedDelegate.indicatorAnimation.restart();
             });
@@ -135,7 +135,7 @@ Kirigami.Page {
                if (delegate.hasChildren && delegate.expanded)
                   return false;
 
-               var idx = treeView.index(delegate.row, delegate.column);
+               var idx = delegate.itemIndex;
                var siblingCount = treeView.model.rowCount(treeView.model.parent(idx));
 
                var stepsUp = delegate.depth - targetDepth;
@@ -187,13 +187,13 @@ Kirigami.Page {
                easing.type: Easing.InOutCubic
             }
 
-            highlighted: testTreeModel.selectedItem === itemIndex
+            highlighted: treeView.model.selectedItem === itemIndex
             background.opacity: treeView.activeFocus ? 1 : 0.7
             focus: delegate.current && treeView.activeFocus//FIXME this flickers when an item is expanded/collapsed
 
             onClicked: {
-               testTreeModel.selectedItem = itemIndex;
-               treeView.selectionModel.setCurrentIndex(treeView.index(delegate.row, delegate.column), ItemSelectionModel.NoUpdate);
+               treeView.model.selectedItem = itemIndex;
+               treeView.selectionModel.setCurrentIndex(itemIndex, ItemSelectionModel.NoUpdate);
                treeView.forceActiveFocus();
             }
 
@@ -254,7 +254,7 @@ Kirigami.Page {
                   radius: Kirigami.Units.cornerRadius
 
                   color: {
-                     if (testTreeModel.selectedItem === delegate.itemIndex) {// if this is the selected device
+                     if (treeView.model.selectedItem === delegate.itemIndex) {// if this is the selected device
                         (arrowArea.containsMouse && !arrowArea.containsPress) ? Kirigami.Theme.activeBackgroundColor : "transparent";
                      } else {
                         arrowArea.containsPress ? Kirigami.Theme.highlightColor : "transparent";
@@ -290,7 +290,7 @@ Kirigami.Page {
                      onClicked: {
                         treeView.toggleExpanded(delegate.row);
                         // make the expanded/collapsed entry current/focused entry:
-                        treeView.selectionModel.setCurrentIndex(treeView.index(delegate.row, delegate.column), ItemSelectionModel.NoUpdate);
+                        treeView.selectionModel.setCurrentIndex(delegate.itemIndex, ItemSelectionModel.NoUpdate);
                         treeView.forceActiveFocus();
                      }
 

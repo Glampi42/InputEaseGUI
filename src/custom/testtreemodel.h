@@ -28,14 +28,14 @@ public:
     ~TestTreeModel() override;
 
     // QAbstractItemModel interface
-    QModelIndex index(int row, int column,
-                      const QModelIndex &parent = {}) const override;
+    QModelIndex index(int row, int column, const QModelIndex &parent = {}) const override;
     QModelIndex parent(const QModelIndex &child) const override;
     int rowCount(const QModelIndex &parent = {}) const override;
     int columnCount(const QModelIndex &parent = {}) const override;
-    QVariant data(const QModelIndex &index,
-                  int role = Qt::DisplayRole) const override;
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     QHash<int, QByteArray> roleNames() const override;
+
+    bool moveRows(const QModelIndex& sourceParent, int sourceRow, int count, const QModelIndex& destinationParent, int destinationChild) override;
 
     // Adds a child node under the given parent index (invalid = root)
     QModelIndex addItem(const QString& label, const QModelIndex& parent = {});
