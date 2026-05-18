@@ -40,21 +40,21 @@ int main(int argc, char *argv[])
 
     TestTreeModel* testModel = new TestTreeModel(&app);
 
-    auto a = testModel->addItem(QStringLiteral("Root A"));
-    auto a1 = testModel->addItem(QStringLiteral("Child A.1"), a);
-    testModel->addItem(QStringLiteral("Such a loooooooooooooooooooooooooooooooooong child"), a1);
-    testModel->addItem(QStringLiteral("Child A.2"), a);
+    auto a = testModel->addItem(QStringLiteral("Root A"), true);
+    auto a1 = testModel->addItem(QStringLiteral("A specific folder"), true, a);
+    testModel->addItem(QStringLiteral("Such a loooooooooooooooooooooooooooooooooong gesture"), false, a1);
+    testModel->addItem(QStringLiteral("Not-so-specific gesture"), false, a);
 
-    auto b = testModel->addItem(QStringLiteral("Root B"));
-    testModel->addItem(QStringLiteral("A very useful gesture"), b);
-    testModel->addItem(QStringLiteral("Another useful gesture"), b);
-    auto b1 = testModel->addItem(QStringLiteral("Child B... does anyone care?"), b);
-    testModel->addItem(QStringLiteral("Yet another gesture"), b1);
-    testModel->addItem(QStringLiteral("Yet another gesture 2"), b1);
+    auto b = testModel->addItem(QStringLiteral("Root B"), true);
+    testModel->addItem(QStringLiteral("A very useful gesture"), false, b);
+    testModel->addItem(QStringLiteral("Another useful gesture"), false, b);
+    auto b1 = testModel->addItem(QStringLiteral("I-forgot-this folder"), true, b);
+    testModel->addItem(QStringLiteral("Yet another gesture"), false, b1);
+    testModel->addItem(QStringLiteral("Empty folder"), true, b1);
 
-    testModel->addItem(QStringLiteral("Swipe gesture #4"));
-    testModel->addItem(QStringLiteral("Swipe gesture #5"));
-    testModel->addItem(QStringLiteral("Swipe gesture #6"));
+    testModel->addItem(QStringLiteral("Swipe gesture #4"), false);
+    testModel->addItem(QStringLiteral("Swipe gesture #5"), false);
+    testModel->addItem(QStringLiteral("Swipe gesture #6"), false);
 
     engine.rootContext()->setContextProperty(QStringLiteral("testTreeModel"), testModel);
 

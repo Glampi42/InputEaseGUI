@@ -49,6 +49,138 @@ Kirigami.Page {
 
    padding: 0
 
+   //--------------------Drag & Drop state--------------------DOWN
+   // Shared drag state. Written by the active DragHandler; read by the overlay visuals.
+   QtObject {
+      id: dragState
+      property bool   active:         false
+      property int    sourceRow:      -1
+      property string label:          ""// label to be displayed on the floating drag item
+      // cursor position in dragOverlay coordinates
+      property real   cursorX:        0
+      property real   cursorY:        0
+      // resolved drop target
+      property int    dropRow:        -1
+      property bool   dropIntoFolder: false
+      // indicator line geometry in dragOverlay coordinates
+      property real   indicatorX:     0
+      property real   indicatorY:     0
+      property real   indicatorW:     0
+   }
+
+   // Returns the index of the last visible child of the specified folder.
+   function findLastChild(/*QModelIndex*/ folderIdx) {
+      var item = treeView.itemAtIndex(folderIdx)
+
+      if (!item.hasChildren)
+         return item;
+
+      for (var i = treeView.model.rowCount(folderIdx) - 1; i > -1; i--) {
+         var childIdx = treeView.model.index(i, 0, folderIdx);
+         if (treeView.itemAtIndex(childIdx) && treeView.itemAtIndex(childIdx).visible)
+            return findLastChild(childIdx);
+      }
+
+      return item;// all children are not visible
+   }
+
+   // Saves the target row where the item should be dropped.
+   // Called from each delegate's DragHandler.onCentroidChanged.
+   // cursorYInTree: the cursor's Y coordinate in treeView viewport coord. space.
+   function updateDropTarget(cursorYInTree) {
+      var contentY = cursorYInTree + treeView.contentY// convert to content space
+
+      var foundRow   = -1
+      var intoFolder = false
+
+      for (var r = 0; r < treeView.rows; r++) {
+         if (r === dragState.sourceRow)
+            continue
+
+         var item = treeView.itemAtIndex(treeView.index(r, 0))
+         if (!item)
+            continue
+
+         if (item.isFolder) {
+            if (contentY < item.y + item.height * 0.2) {
+               // Cursor is in the top third → insert before this row
+               foundRow   = r
+               intoFolder = false
+               break
+
+            } else if (contentY < item.y + item.height * 0.8) {
+               // Cursor is in the middle third -> insert as last element of this folder
+               foundRow   = r
+               intoFolder = true
+               break
+            } else if (contentY < item.y + item.height) {
+               // Cursor is in the bottom third -> insert below this row
+               foundRow   = r + 1
+               intoFolder = false
+               break
+            }
+         }
+         else {
+            if (contentY < item.y + item.height * 0.5) {
+               // Cursor is in the top half → insert before this row
+               foundRow   = r
+               intoFolder = false
+               break
+
+            } else if (contentY < item.y + item.height) {
+               // Cursor is in the bottom half -> insert below this row
+               foundRow   = r + 1
+               intoFolder = false
+               break
+            }
+         }
+      }
+
+      if (foundRow < 0) {
+         // below all rows → append at end
+         foundRow   = treeView.rows
+         intoFolder = false
+      }
+
+      dragState.dropRow        = foundRow
+      dragState.dropIntoFolder = intoFolder
+
+      // ---- Compute indicator line position (in dragOverlay coordinates) ----
+      var vpY   = 0
+      var depth = 0
+
+      if (intoFolder) {
+         // line appears below the last visible item of the folder
+         var fi = findLastChild(treeView.index(foundRow, 0))
+         if (fi) {
+            vpY   = fi.y + fi.height + Kirigami.Units.smallSpacing / 2 - treeView.contentY
+            depth = treeView.itemAtIndex(treeView.index(foundRow, 0)).depth + 1  // indent one level deeper than the folder
+         }
+      } else if (foundRow >= treeView.rows) {
+         // line appears below the last visible row
+         var li = treeView.itemAtIndex(treeView.index(treeView.rows - 1, 0))
+         if (li) {
+            vpY   = li.y + li.height + Kirigami.Units.smallSpacing / 2 - treeView.contentY
+            depth = li.depth
+         }
+      } else {
+         // line appears above the target row
+         var ti = treeView.itemAtIndex(treeView.index(foundRow, 0))
+         if (ti) {
+            vpY   = ti.y - Kirigami.Units.smallSpacing / 2 - treeView.contentY
+            depth = ti.depth
+         }
+      }
+
+      // mirror the delegate's leftInset indentation formula:
+      var indentPx = 1 + Kirigami.Units.smallSpacing + depth * Kirigami.Units.iconSizes.smallMedium
+      var mapped   = treeView.mapToItem(dragOverlay, indentPx, vpY)
+      dragState.indicatorX = mapped.x
+      dragState.indicatorY = mapped.y
+      dragState.indicatorW = dragOverlay.width - mapped.x
+   }
+   //--------------------Drag & Drop state--------------------UP
+
    QQC.ScrollView {
       id: scrollView
 
@@ -176,6 +308,8 @@ Kirigami.Page {
             required property int column
             required property bool current
 
+            required property bool isFolder
+
             property var/*QModelIndex*/ itemIndex: treeView.index(row, column)
 
             property Animation indicatorAnimation: NumberAnimation {//FIXME the arrow jumps to the end position for a single frame before the animation (probably same reason as the flicker below)
@@ -191,6 +325,9 @@ Kirigami.Page {
             background.opacity: treeView.activeFocus ? 1 : 0.7
             focus: delegate.current && treeView.activeFocus//FIXME this flickers when an item is expanded/collapsed
 
+            // dim source row while dragging
+            opacity: dragState.active && dragState.sourceRow === row ? 0.35 : 1.0
+
             onClicked: {
                treeView.model.selectedItem = itemIndex;
                treeView.selectionModel.setCurrentIndex(itemIndex, ItemSelectionModel.NoUpdate);
@@ -199,6 +336,51 @@ Kirigami.Page {
 
             onDoubleClicked: {
                treeView.toggleExpanded(delegate.row);
+            }
+
+            DragHandler {
+               id: dragHandler
+
+               // target: null → the handler tracks the drag but never moves any Item
+               target: null
+               dragThreshold: 8
+
+               onActiveChanged: {
+                  if (active) {
+                     dragState.active    = true
+                     dragState.sourceRow = delegate.row
+                     dragState.label     = model.display
+                     dragState.dropRow   = -1
+                  } else {
+                     // Drag released: commit the move if the drop target is valid
+                     if (dragState.active
+                           && dragState.dropRow >= 0
+                           && dragState.dropRow !== dragState.sourceRow) {
+                        // TODO: replace with real implementation
+                        // treeView.model.moveItem(dragState.sourceRow,
+                        //                         dragState.dropRow,
+                        //                         dragState.dropIntoFolder)
+                     }
+                     dragState.active         = false
+                     dragState.sourceRow      = -1
+                     dragState.dropRow        = -1
+                     dragState.dropIntoFolder = false
+                  }
+               }
+
+               onCentroidChanged: {
+                  if (!active)
+                     return;
+
+                  var sp = centroid.scenePosition;
+                  // Update badge position (in dragOverlay coordinates)
+                  var inOverlay = dragOverlay.mapFromGlobal(sp.x, sp.y);
+                  dragState.cursorX = inOverlay.x;
+                  dragState.cursorY = inOverlay.y;
+                  // Update drop target + indicator line geometry
+                  var inTree = treeView.mapFromGlobal(sp.x, sp.y);
+                  root.updateDropTarget(inTree.y);
+               }
             }
 
             contentItem: RowLayout {
@@ -277,11 +459,7 @@ Kirigami.Page {
                      rotation: delegate.expanded ? 90 : 0
                   }
 
-                  // Dedicated input area for the arrow.
-                  // hoverEnabled drives the outline via containsMouse.
-                  // By accepting the mouse press (Qt default), it prevents
-                  // the event from reaching the parent delegate's button
-                  // handler, so onClicked on the delegate will not fire.
+                  // dedicated input area for the arrow
                   MouseArea {
                      id: arrowArea
 
@@ -304,7 +482,7 @@ Kirigami.Page {
                Kirigami.Icon {
                   id: folderIcon
 
-                  visible: isTreeNode && hasChildren//TODO other visibility condition
+                  visible: isTreeNode && delegate.isFolder
 
                   source: "document-open-folder"
                   implicitWidth: Kirigami.Units.iconSizes.smallMedium
@@ -328,4 +506,84 @@ Kirigami.Page {
          }
       }
    }
+
+   //--------------------Drag & Drop overlay visuals--------------------DOWN
+   Item {
+      id: dragOverlay
+
+      anchors.fill: parent
+      z: 999
+
+      // drop indicator line
+      Rectangle {
+         visible: dragState.active && dragState.dropRow >= 0
+         x:       dragState.indicatorX
+         y:       dragState.indicatorY - 1
+         width:   dragState.indicatorW
+         height:  2
+         color:   Kirigami.Theme.highlightColor
+         radius:  1
+
+         // round cap at the left end
+         Rectangle {
+            width:  8
+            height: 8
+            radius: 4
+            color:  Kirigami.Theme.highlightColor
+            anchors {
+               left:           parent.left
+               leftMargin:     -4
+               verticalCenter: parent.verticalCenter
+            }
+         }
+      }
+
+      // drag badge: icon + label that follows the cursor
+      Item {
+         visible: dragState.active
+         x:       dragState.cursorX + 14
+         y:       dragState.cursorY - height * 0.5
+
+         width:  badgeIcon.implicitWidth
+                 + Kirigami.Units.smallSpacing
+                 + badgeLabel.implicitWidth
+                 + Kirigami.Units.smallSpacing * 3
+         height: Kirigami.Units.iconSizes.smallMedium + Kirigami.Units.smallSpacing * 2
+
+         Rectangle {
+            anchors.fill: parent
+            color:   Kirigami.Theme.highlightColor
+            opacity: 0.92
+            radius:  Kirigami.Units.cornerRadius
+         }
+
+         Kirigami.Icon {
+            id: badgeIcon
+            source: "list-drag-handle"
+            implicitWidth:  Kirigami.Units.iconSizes.small
+            implicitHeight: Kirigami.Units.iconSizes.small
+            anchors {
+               left:           parent.left
+               leftMargin:     Kirigami.Units.smallSpacing
+               verticalCenter: parent.verticalCenter
+            }
+         }
+
+         QQC.Label {
+            id: badgeLabel
+            text:            dragState.label
+            color:           Kirigami.Theme.highlightedTextColor
+            elide:           Text.ElideRight
+            maximumLineCount: 1
+            anchors {
+               left:           badgeIcon.right
+               leftMargin:     Kirigami.Units.smallSpacing
+               right:          parent.right
+               rightMargin:    Kirigami.Units.smallSpacing
+               verticalCenter: parent.verticalCenter
+            }
+         }
+      }
+   }
+   //--------------------Drag & Drop overlay visuals--------------------UP
 }

@@ -4,7 +4,7 @@
 
 TestTreeModel::TestTreeModel(QObject* parent)
     : QAbstractItemModel(parent)
-    , m_root(new TreeNode(QStringLiteral("root")))
+    , m_root(new TreeNode(QStringLiteral("root"), true))
 {
     m_selectedItem = nullptr;
 }
@@ -52,13 +52,13 @@ int TestTreeModel::columnCount(const QModelIndex& /*parent*/) const
     return 1;
 }
 
-QModelIndex TestTreeModel::addItem(const QString& label, const QModelIndex& parent)
+QModelIndex TestTreeModel::addItem(const QString& label, bool isFolder, const QModelIndex& parent)
 {
     TreeNode* parentNode = nodeFromIndex(parent);
     const int row = parentNode->children.size();
 
     beginInsertRows(parent, row, row);
-    auto* node = new TreeNode(label, parentNode);
+    auto* node = new TreeNode(label, isFolder, parentNode);
     parentNode->children.append(node);
     endInsertRows();
 
@@ -115,8 +115,12 @@ QVariant TestTreeModel::data(const QModelIndex& index, int role) const
 
     switch (role) {
     case Qt::DisplayRole:
-    case Qt::UserRole:
+    case Qt::UserRole + 1:
         return node->label;
+
+    case Qt::UserRole + 2:
+        return node->isFolder;
+
     default:
         return {};
     }
@@ -126,6 +130,7 @@ QHash<int, QByteArray> TestTreeModel::roleNames() const
 {
     return {
             { Qt::DisplayRole, "display" },
-            { Qt::UserRole,    "label"   },
+            { Qt::UserRole + 1,    "label"   },
+            { Qt::UserRole + 2,    "isFolder"   },
             };
 }

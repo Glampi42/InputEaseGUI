@@ -5,11 +5,12 @@
 #include <QString>
 
 struct TreeNode {
-    explicit TreeNode(QString label, TreeNode* parent = nullptr)
-        : label(std::move(label)), parent(parent) {}
+    explicit TreeNode(QString label, bool isFolder, TreeNode* parent = nullptr)
+        : label(std::move(label)), isFolder(isFolder), parent(parent) {}
     ~TreeNode() { qDeleteAll(children); }
 
     QString label;
+    bool isFolder;// false for normal entries (leaves), true for folders
     TreeNode* parent = nullptr;
     QList<TreeNode*> children;
 };
@@ -38,7 +39,7 @@ public:
     bool moveRows(const QModelIndex& sourceParent, int sourceRow, int count, const QModelIndex& destinationParent, int destinationChild) override;
 
     // Adds a child node under the given parent index (invalid = root)
-    QModelIndex addItem(const QString& label, const QModelIndex& parent = {});
+    QModelIndex addItem(const QString& label, bool isFolder, const QModelIndex& parent = {});
 
     QModelIndex qml_getSelectedItem() { return nodeToIndex(m_selectedItem); }
     void qml_setSelectedItem(QModelIndex selectedIdx) {
