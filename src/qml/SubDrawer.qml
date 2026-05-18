@@ -102,13 +102,13 @@ Kirigami.Page {
             continue;
 
          if (item.isFolder) {
-            if (contentY < item.y + item.height * 0) {
+            if (contentY < item.y + item.height * 0.1) {
                // Cursor is in the top third → insert before this row
                foundRow   = r
                intoFolder = false
                break
 
-            } else if (contentY < item.y + item.height * 1) {
+            } else if (contentY < item.y + item.height * 0.9) {
                // Cursor is in the middle third -> insert as last element of this folder
                foundRow   = r
                intoFolder = true
@@ -411,16 +411,6 @@ Kirigami.Page {
 
                         implicitHeight: Kirigami.Units.iconSizes.smallMedium + Kirigami.Units.smallSpacing * 3.5
                      }
-
-                     // horizontal bar
-                     // Kirigami.Separator {
-                     //    visible: delegate.isLastAtDepth(treeBranch.index)
-
-                     //    x: parent.width / 2 - 0.5
-                     //    y: Kirigami.Units.iconSizes.smallMedium + Kirigami.Units.smallSpacing * 1.5 - 0.5
-
-                     //    implicitWidth: Kirigami.Units.iconSizes.smallMedium / 2 + 0.5
-                     // }
                   }
                }
 
@@ -521,9 +511,9 @@ Kirigami.Page {
       // drop indicator line
       Rectangle {
          visible: dragState.active && dragState.dropRow >= 0
-         x:       dragState.indicatorX
+         x:       dragState.indicatorX + 4
          y:       dragState.indicatorY - 1
-         width:   dragState.indicatorW
+         width:   dragState.indicatorW - 4
          height:  2
          color:   Kirigami.Theme.highlightColor
          radius:  1
