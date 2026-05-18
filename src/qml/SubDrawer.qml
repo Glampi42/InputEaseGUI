@@ -95,20 +95,20 @@ Kirigami.Page {
 
       for (var r = 0; r < treeView.rows; r++) {
          if (r === dragState.sourceRow)
-            continue
+            continue;
 
          var item = treeView.itemAtIndex(treeView.index(r, 0))
          if (!item)
-            continue
+            continue;
 
          if (item.isFolder) {
-            if (contentY < item.y + item.height * 0.2) {
+            if (contentY < item.y + item.height * 0) {
                // Cursor is in the top third → insert before this row
                foundRow   = r
                intoFolder = false
                break
 
-            } else if (contentY < item.y + item.height * 0.8) {
+            } else if (contentY < item.y + item.height * 1) {
                // Cursor is in the middle third -> insert as last element of this folder
                foundRow   = r
                intoFolder = true
@@ -323,7 +323,11 @@ Kirigami.Page {
 
             highlighted: treeView.model.selectedItem === itemIndex
             background.opacity: treeView.activeFocus ? 1 : 0.7
-            focus: delegate.current && treeView.activeFocus//FIXME this flickers when an item is expanded/collapsed
+            focus: !dragState.active ?
+                     delegate.current && treeView.activeFocus ://FIXME this flickers when an item is expanded/collapsed
+                     dragState.dropIntoFolder && dragState.dropRow === row
+
+            hoverEnabled: !dragState.active
 
             // dim source row while dragging
             opacity: dragState.active && dragState.sourceRow === row ? 0.35 : 1.0
@@ -409,14 +413,14 @@ Kirigami.Page {
                      }
 
                      // horizontal bar
-                     Kirigami.Separator {
-                        visible: delegate.isLastAtDepth(treeBranch.index)
+                     // Kirigami.Separator {
+                     //    visible: delegate.isLastAtDepth(treeBranch.index)
 
-                        x: parent.width / 2 - 0.5
-                        y: Kirigami.Units.iconSizes.smallMedium + Kirigami.Units.smallSpacing * 1.5 - 0.5
+                     //    x: parent.width / 2 - 0.5
+                     //    y: Kirigami.Units.iconSizes.smallMedium + Kirigami.Units.smallSpacing * 1.5 - 0.5
 
-                        implicitWidth: Kirigami.Units.iconSizes.smallMedium / 2 + 0.5
-                     }
+                     //    implicitWidth: Kirigami.Units.iconSizes.smallMedium / 2 + 0.5
+                     // }
                   }
                }
 
