@@ -84,6 +84,17 @@ Kirigami.Page {
       return item;// all children are not visible
    }
 
+   // Returns true in case this item or its parent folder is being dragged.
+   function isBeingDragged(/*QModelIndex*/ itemIdx) {
+      if (treeView.rowAtIndex(itemIdx) === dragState.sourceRow)
+         return true;
+
+      if (!treeView.model.parent(itemIdx).valid)
+         return false;
+
+      return isBeingDragged(treeView.model.parent(itemIdx));
+   }
+
    // Saves the target row where the item should be dropped.
    // Called from each delegate's DragHandler.onCentroidChanged.
    // cursorYInTree: the cursor's Y coordinate in treeView viewport coord. space.
@@ -94,21 +105,18 @@ Kirigami.Page {
       var intoFolder = false
 
       for (var r = 0; r < treeView.rows; r++) {
-         if (r === dragState.sourceRow)
-            continue;
-
          var item = treeView.itemAtIndex(treeView.index(r, 0))
          if (!item)
             continue;
 
          if (item.isFolder) {
-            if (contentY < item.y + item.height * 0.1) {
+            if (contentY < item.y + item.height * 0.2) {
                // Cursor is in the top third → insert before this row
                foundRow   = r
                intoFolder = false
                break
 
-            } else if (contentY < item.y + item.height * 0.9) {
+            } else if (contentY < item.y + item.height * 0.8) {
                // Cursor is in the middle third -> insert as last element of this folder
                foundRow   = r
                intoFolder = true
@@ -137,13 +145,31 @@ Kirigami.Page {
       }
 
       if (foundRow < 0) {
-         // below all rows → append at end
+         // below all rows → append at the end
          foundRow   = treeView.rows
          intoFolder = false
       }
 
-      dragState.dropRow        = foundRow
-      dragState.dropIntoFolder = intoFolder
+      var foundIdx = treeView.index(foundRow, 0);
+      var sourceIdx = treeView.index(dragState.sourceRow, 0);
+      // ---- Gather all drop targets that don't move the item (e.g. dropping the item to one of its children) ----
+      if(
+            foundRow === dragState.sourceRow ||// if dropping above source item
+
+            (treeView.model.parent(foundIdx) === treeView.model.parent(sourceIdx) &&
+             foundIdx.row === sourceIdx.row + 1 && !intoFolder) ||// if dropping below source item
+
+            isBeingDragged(treeView.model.parent(foundIdx)) ||// if dropping into source item/one of its children
+
+            (!intoFolder && !treeView.model.parent(foundIdx).valid && !treeView.model.parent(sourceIdx).valid &&
+             foundRow === treeView.rows && sourceIdx.row === treeView.model.rowCount() - 1)// if dropping last item at the end of the treeView (edge case)
+         ) {
+         foundRow = dragState.sourceRow;// all cases above are equivalent to not moving the item, so dropRow = sourceRow
+         intoFolder = false;
+      }
+
+      dragState.dropRow        = foundRow;
+      dragState.dropIntoFolder = intoFolder;
 
       // ---- Compute indicator line position (in dragOverlay coordinates) ----
       var vpY   = 0
@@ -312,6 +338,9 @@ Kirigami.Page {
 
             property var/*QModelIndex*/ itemIndex: treeView.index(row, column)
 
+            property bool currentlyDragged: dragState.active && isBeingDragged(itemIndex)
+            property bool _draggedThisPress: false
+
             property Animation indicatorAnimation: NumberAnimation {//FIXME the arrow jumps to the end position for a single frame before the animation (probably same reason as the flicker below)
                target: indicatorIcon
                property: "rotation"
@@ -322,15 +351,18 @@ Kirigami.Page {
             }
 
             highlighted: treeView.model.selectedItem === itemIndex
+            down: pressed && !_draggedThisPress
             background.opacity: treeView.activeFocus ? 1 : 0.7
             focus: !dragState.active ?
                      delegate.current && treeView.activeFocus ://FIXME this flickers when an item is expanded/collapsed
-                     dragState.dropIntoFolder && dragState.dropRow === row
+                     !currentlyDragged && dragState.dropIntoFolder && dragState.dropRow === row
 
             hoverEnabled: !dragState.active
 
             // dim source row while dragging
-            opacity: dragState.active && dragState.sourceRow === row ? 0.35 : 1.0
+            opacity: currentlyDragged ? 0.35 : 1.0
+
+            onPressed: _draggedThisPress = false
 
             onClicked: {
                treeView.model.selectedItem = itemIndex;
@@ -355,16 +387,15 @@ Kirigami.Page {
                      dragState.sourceRow = delegate.row
                      dragState.label     = model.display
                      dragState.dropRow   = -1
+
+                     _draggedThisPress = true
                   } else {
-                     // Drag released: commit the move if the drop target is valid
-                     if (dragState.active
-                           && dragState.dropRow >= 0
-                           && dragState.dropRow !== dragState.sourceRow) {
-                        // TODO: replace with real implementation
-                        // treeView.model.moveItem(dragState.sourceRow,
-                        //                         dragState.dropRow,
-                        //                         dragState.dropIntoFolder)
-                     }
+                     // Drag released: commit the drop
+                     // TODO: replace with real implementation
+                     // treeView.model.moveItem(dragState.sourceRow,
+                     //                         dragState.dropRow,
+                     //                         dragState.dropIntoFolder)
+
                      dragState.active         = false
                      dragState.sourceRow      = -1
                      dragState.dropRow        = -1
@@ -409,7 +440,7 @@ Kirigami.Page {
                         x: parent.width / 2 - 0.5
                         y: 0 - Kirigami.Units.smallSpacing * 2
 
-                        implicitHeight: Kirigami.Units.iconSizes.smallMedium + Kirigami.Units.smallSpacing * 3.5
+                        implicitHeight: Kirigami.Units.iconSizes.smallMedium + Kirigami.Units.smallSpacing * 3
                      }
                   }
                }
@@ -458,7 +489,7 @@ Kirigami.Page {
                      id: arrowArea
 
                      anchors.fill: parent
-                     hoverEnabled: true
+                     hoverEnabled: !dragState.active
                      onClicked: {
                         treeView.toggleExpanded(delegate.row);
                         // make the expanded/collapsed entry current/focused entry:
@@ -510,20 +541,21 @@ Kirigami.Page {
 
       // drop indicator line
       Rectangle {
-         visible: dragState.active && dragState.dropRow >= 0
+         visible: dragState.active && dragState.dropRow !== -1 && dragState.dropRow !== dragState.sourceRow
+
          x:       dragState.indicatorX + 4
          y:       dragState.indicatorY - 1
          width:   dragState.indicatorW - 4
          height:  2
-         color:   Kirigami.Theme.highlightColor
          radius:  1
+         color: Kirigami.Theme.highlightColor
 
          // round cap at the left end
          Rectangle {
             width:  8
             height: 8
             radius: 4
-            color:  Kirigami.Theme.highlightColor
+            color: Kirigami.Theme.highlightColor
             anchors {
                left:           parent.left
                leftMargin:     -4

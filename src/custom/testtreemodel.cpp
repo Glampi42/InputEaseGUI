@@ -90,6 +90,24 @@ bool TestTreeModel::moveRows(const QModelIndex& sourceParent, int sourceRow, int
     return true;
 }
 
+bool TestTreeModel::canDropItem(const QModelIndex& sourceIndex, const QModelIndex& targetIndex, bool intoFolder) const
+{
+    if (!sourceIndex.isValid())
+        return false;
+
+    // When intoFolder == true  → new parent IS targetIndex
+    // When intoFolder == false → new parent is targetIndex's parent (insert before)
+    QModelIndex newParentIndex = intoFolder ? targetIndex : parent(targetIndex);
+
+    QModelIndex idx = newParentIndex;
+    while (idx.isValid()) {
+        if (idx == sourceIndex)
+            return false;// drop target's parent is sourceIndex or one of its descendants
+        idx = parent(idx);
+    }
+    return true;
+}
+
 TreeNode* TestTreeModel::nodeFromIndex(const QModelIndex& index) const
 {
     if (!index.isValid())

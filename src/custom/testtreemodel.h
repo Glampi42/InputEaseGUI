@@ -36,6 +36,8 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     QHash<int, QByteArray> roleNames() const override;
 
+    Q_INVOKABLE bool canDropItem(const QModelIndex& sourceIndex, const QModelIndex& targetIndex, bool intoFolder) const;
+
     bool moveRows(const QModelIndex& sourceParent, int sourceRow, int count, const QModelIndex& destinationParent, int destinationChild) override;
 
     // Adds a child node under the given parent index (invalid = root)
