@@ -36,7 +36,7 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     QHash<int, QByteArray> roleNames() const override;
 
-    Q_INVOKABLE bool canDropItem(const QModelIndex& sourceIndex, const QModelIndex& targetIndex, bool intoFolder) const;
+    Q_INVOKABLE void moveItem(const QModelIndex& sourceIndex, const QModelIndex& targetIndex, bool intoFolder);
 
     bool moveRows(const QModelIndex& sourceParent, int sourceRow, int count, const QModelIndex& destinationParent, int destinationChild) override;
 

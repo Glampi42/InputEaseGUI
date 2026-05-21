@@ -364,11 +364,8 @@ Kirigami.Page {
 
                      _draggedThisPress = true
                   } else {
-                     // Drag released: commit the drop
-                     // TODO: replace with real implementation
-                     // treeView.model.moveItem(dragState.sourceRow,
-                     //                         dragState.dropRow,
-                     //                         dragState.dropIntoFolder)
+                     // drag released: commit the drop
+                     treeView.model.moveItem(treeView.index(dragState.sourceRow, 0), treeView.index(dragState.dropRow, 0), dragState.dropIntoFolder);
 
                      dragState.active         = false
                      dragState.sourceRow      = -1

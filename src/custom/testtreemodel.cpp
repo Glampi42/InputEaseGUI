@@ -82,6 +82,10 @@ bool TestTreeModel::moveRows(const QModelIndex& sourceParent, int sourceRow, int
 
     sourceParentNode->children.removeAt(sourceRow);
 
+    if(sourceParent == destinationParent && sourceRow < destinationChild) {// removed rows above destinationChild
+        destinationChild -= count;
+    }
+
     int insertIdx = std::max(0, std::min(destinationChild, (int) newParentNode->children.count()));
     newParentNode->children.insert(insertIdx, targetNode);
     targetNode->parent = newParentNode;
@@ -90,22 +94,12 @@ bool TestTreeModel::moveRows(const QModelIndex& sourceParent, int sourceRow, int
     return true;
 }
 
-bool TestTreeModel::canDropItem(const QModelIndex& sourceIndex, const QModelIndex& targetIndex, bool intoFolder) const
-{
-    if (!sourceIndex.isValid())
-        return false;
+void TestTreeModel::moveItem(const QModelIndex& sourceIndex, const QModelIndex& targetIndex, bool intoFolder) {
+    int sourceRow = nodeFromIndex(parent(sourceIndex))->children.indexOf(nodeFromIndex(sourceIndex));
+    QModelIndex destinationParent = !targetIndex.isValid() ? QModelIndex() : (intoFolder ? targetIndex : parent(targetIndex));
+    int destinationRow = !targetIndex.isValid() ? m_root->children.count() : (intoFolder ? nodeFromIndex(targetIndex)->children.count() : nodeFromIndex(parent(targetIndex))->children.indexOf(nodeFromIndex(targetIndex)));
 
-    // When intoFolder == true  → new parent IS targetIndex
-    // When intoFolder == false → new parent is targetIndex's parent (insert before)
-    QModelIndex newParentIndex = intoFolder ? targetIndex : parent(targetIndex);
-
-    QModelIndex idx = newParentIndex;
-    while (idx.isValid()) {
-        if (idx == sourceIndex)
-            return false;// drop target's parent is sourceIndex or one of its descendants
-        idx = parent(idx);
-    }
-    return true;
+    moveRows(parent(sourceIndex), sourceRow, 1, destinationParent, destinationRow);
 }
 
 TreeNode* TestTreeModel::nodeFromIndex(const QModelIndex& index) const
