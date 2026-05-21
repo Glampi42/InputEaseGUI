@@ -228,7 +228,9 @@ Kirigami.GlobalDrawer {
             bottomInset: 0
             bottomPadding: Kirigami.Units.smallSpacing
             leftInset: Kirigami.Units.smallSpacing
+            leftPadding: Kirigami.Units.smallSpacing*2
             rightInset: Kirigami.Units.smallSpacing
+            rightPadding: Kirigami.Units.smallSpacing*2
 
             highlighted: mainDrawerModel.selectedItem === index
             background.opacity: listView.activeFocus ? 1 : 0.7
