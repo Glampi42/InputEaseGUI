@@ -263,23 +263,6 @@ Kirigami.Page {
          bottomMargin: Kirigami.Units.largeSpacing
          rowSpacing: Kirigami.Units.smallSpacing
 
-         //--------------------Animating collapsing/expanding--------------------DOWN
-         // needs to happen here instead of using onExpandedChanged() in the delegate,
-         // because that is unreliable (TreeView sometimes rebuilds delegates completely)
-         onExpanded: function (_row, _depth) {
-            Qt.callLater(function () {// treeView.index doesn't resolve if called right away
-               var expandedDelegate = treeView.itemAtIndex(treeView.index(_row, 0));
-               expandedDelegate.indicatorAnimation.restart();
-            });
-         }
-         onCollapsed: function (_row, _depth) {
-            Qt.callLater(function () {// treeView.index doesn't resolve if called right away
-               var collapsedDelegate = treeView.itemAtIndex(treeView.index(_row, 0));
-               collapsedDelegate.indicatorAnimation.restart();
-            });
-         }
-         //--------------------Animating collapsing/expanding--------------------UP
-
          delegate: QQC.ItemDelegate {
             id: delegate
 
@@ -340,15 +323,6 @@ Kirigami.Page {
 
             property bool currentlyDragged: dragState.active && isBeingDragged(itemIndex)
             property bool _draggedThisPress: false
-
-            property Animation indicatorAnimation: NumberAnimation {//FIXME the arrow jumps to the end position for a single frame before the animation (probably same reason as the flicker below)
-               target: indicatorIcon
-               property: "rotation"
-               from: expanded ? 0 : 90
-               to: expanded ? 90 : 0
-               duration: Kirigami.Units.shortDuration
-               easing.type: Easing.InOutCubic
-            }
 
             highlighted: treeView.model.selectedItem === itemIndex
             down: pressed && !_draggedThisPress
